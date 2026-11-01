@@ -1,0 +1,85 @@
+diff --git c/tests/probe_stubs.h w/tests/probe_stubs.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..8e547c51d7a0c734df98bed50d3fae90afa89ef4
+--- /dev/null
++++ w/tests/probe_stubs.h
+@@ -0,0 +1,21 @@
++/* Tests of runtime modules do not load a game image through probe.c. */
++#ifndef CTR_TEST_PROBE_STUBS_H
++#define CTR_TEST_PROBE_STUBS_H
++#include "runtime.h"
++#include <assert.h>
++
++uintptr_t runtime_probe_image(uint64_t *size) {
++    if (size) *size=0;
++    return 0;
++}
++void runtime_probe_read_image(uintptr_t address, void *data, uint64_t size) {
++    (void)address; (void)data; (void)size;
++    assert(!"network test must not read a guest image");
++}
++int runtime_probe_write_image(uintptr_t address, const void *data, uint64_t size) {
++    (void)address; (void)data; (void)size;
++    assert(!"network test must not write a guest image");
++    return 0;
++}
++
++#endif
+diff --git c/tests/test_eventflag.c w/tests/test_eventflag.c
+index c16aabfc279f89724ad5ae05baed1d0e6b0b89fa..288368ceeb3f415c872deaa5aee5bbd17bc56e7b 100644
+--- c/tests/test_eventflag.c
++++ w/tests/test_eventflag.c
+@@ -1,6 +1,7 @@
+ /* SacredFire: kernel event flag contracts (src/runtime_eventflag.c). */
+ #define _GNU_SOURCE
+ #include "runtime.h"
++#include "probe_stubs.h"
+ #include <assert.h>
+ #include <pthread.h>
+ #include <stdio.h>
+diff --git c/tests/test_net.c w/tests/test_net.c
+index 4ab3e942cb1e59cf52e08a07ae6c6bc5d8d70bce..af7990d1fa2e93c7aadcf726f8315af6b9ca4a96 100644
+--- c/tests/test_net.c
++++ w/tests/test_net.c
+@@ -3,6 +3,19 @@
+ #include "../src/runtime_net.c"
+ #include <assert.h>
+ 
++/* Socket tests have no loaded guest image or mapped guest memory. Keep the
++ * runtime's optional diagnostics disabled while testing the real network code. */
++__thread sigjmp_buf *runtime_fault_recover;
++#include "probe_stubs.h"
++void runtime_memory_read_backing(uintptr_t address, void *data, uint64_t size) {
++    (void)address; (void)data; (void)size;
++    assert(!"network test must not read guest memory");
++}
++int runtime_memory_vma_info(uintptr_t address, int *prot, int *type, uintptr_t *end) {
++    (void)address; (void)prot; (void)type; (void)end;
++    return 0;
++}
++
+ uintptr_t runtime_lookup(const RuntimeExport *table,size_t count,const char *nid) {
+     for (size_t i=0;i<count;++i) if (!strcmp(table[i].name,nid)) return (uintptr_t)table[i].function;
+     return 0;
+diff --git c/tests/test_runtime.c w/tests/test_runtime.c
+index 89e629867397ffe0f0dfc7fa50f90e7d2b7c3c29..319ad8e9a6b55615e707ab282d177a5a8d8b3ef3 100644
+--- c/tests/test_runtime.c
++++ w/tests/test_runtime.c
+@@ -1,5 +1,6 @@
+ #define _GNU_SOURCE
+ #include "runtime.h"
++#include "probe_stubs.h"
+ #include <stdlib.h>
+ 
+ /* The settings menu of the GPU library restarts through probe.c, which tests do not link. */
+diff --git c/tests/test_sema.c w/tests/test_sema.c
+index 223f9c9dce78e8cb872db06728ba493a19ad15f2..3333a28b176e23fa81727b8e889f605d3039ff20 100644
+--- c/tests/test_sema.c
++++ w/tests/test_sema.c
+@@ -1,5 +1,6 @@
+ #define _GNU_SOURCE
+ #include "runtime.h"
++#include "probe_stubs.h"
+ #include <stdlib.h>
+ 
+ /* The settings menu of the GPU library restarts through probe.c, which tests do not link. */
