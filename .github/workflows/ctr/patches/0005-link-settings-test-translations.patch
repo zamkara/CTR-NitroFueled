@@ -1,0 +1,23 @@
+diff --git i/gpu/CMakeLists.txt w/gpu/CMakeLists.txt
+index a8db60bee50097c765c8576206bfe0a9342d7d1d..8efeea5c45b7b51b8c6a576032dd61c18605046a 100644
+--- i/gpu/CMakeLists.txt
++++ w/gpu/CMakeLists.txt
+@@ -274,7 +274,8 @@ target_link_libraries(motion-shader-test PRIVATE bbgpu)
+ add_executable(ui-composition-test EXCLUDE_FROM_ALL ../tests/test_ui_composition.cpp)
+ target_compile_options(ui-composition-test PRIVATE -UNDEBUG -Wall -Wextra -Werror)
+ target_include_directories(ui-composition-test PRIVATE ..)
+-add_executable(settings-test EXCLUDE_FROM_ALL ../tests/test_settings.cpp shim/bbport_settings.cpp)
++add_executable(settings-test EXCLUDE_FROM_ALL ../tests/test_settings.cpp
++    shim/bbport_settings.cpp shim/bbport_menu_es.cpp)
+ target_compile_options(settings-test PRIVATE -UNDEBUG -Wall -Wextra -Werror)
+ target_include_directories(settings-test PRIVATE .. shim)
+ 
+@@ -302,7 +303,7 @@ add_dependencies(camera-motion-test host_shaders)
+ 
+ # bbport: FSR 4 benchmark outside the game (tools/fsr4_bench.cpp): ninja -C out/gpu fsr4-bench.
+ add_executable(upscaler-support-test EXCLUDE_FROM_ALL ../tests/test_upscaler_support.cpp
+-    shim/bbport_settings.cpp)
++    shim/bbport_settings.cpp shim/bbport_menu_es.cpp)
+ target_include_directories(upscaler-support-test PRIVATE shim)
+ target_compile_options(upscaler-support-test PRIVATE -UNDEBUG)
+ 
