@@ -21,3 +21,45 @@ index a8db60bee50097c765c8576206bfe0a9342d7d1d..8efeea5c45b7b51b8c6a576032dd61c1
  target_include_directories(upscaler-support-test PRIVATE shim)
  target_compile_options(upscaler-support-test PRIVATE -UNDEBUG)
  
+diff --git i/tests/test_upscaler_support.cpp w/tests/test_upscaler_support.cpp
+index 66bd7e6cfa6625cf016447b343adadff717a309e..50351f335b769484b8f18ab47bec8b0c5bdd61a7 100644
+--- i/tests/test_upscaler_support.cpp
++++ w/tests/test_upscaler_support.cpp
+@@ -1,5 +1,5 @@
+ // SPDX-License-Identifier: GPL-2.0-or-later
+-// Saved FSR 4 choices must be safe before the first rendered frame on older GPUs.
++// CTR disables the inherited upscaler on load; capability fallback remains safe.
+ #include <cassert>
+ #include <cstdio>
+ #include <cstdlib>
+@@ -24,8 +24,8 @@ int main() {
+     Save();
+     s.upscaler = UpscalerOff;
+     Load();
+-    assert(s.upscaler == UpscalerTaa && s.preset == Performance);
+-    assert(RenderPreset() == NativeAA && !ResolutionNeedsRestart());
++    assert(s.upscaler == UpscalerOff && s.preset == Performance);
++    assert(RenderPreset() == Performance && !ResolutionNeedsRestart());
+     s.upscaler = UpscalerFsr3;
+     assert(RenderPreset() == Performance);
+     for (bool fsr4 : {false, true}) {
+@@ -38,7 +38,9 @@ int main() {
+                 std::fclose(config);
+                 s.fsr4_problem = nullptr;
+                 Load();
+-                assert(s.upscaler == requested);
++                assert(s.upscaler == UpscalerOff);
++                // Exercise provider fallback independently of CTR's load policy.
++                s.upscaler = requested;
+                 ConfigureUpscalerSupport(fsr4, fsr411);
+                 const bool unsupported = (requested == UpscalerFsr4 && !fsr4) ||
+                     (requested == UpscalerFsr411 && !(fsr4 && fsr411));
+@@ -48,7 +50,7 @@ int main() {
+                 assert(bool(s.fsr4_problem.load()) == unsupported);
+                 assert(s.preset == Performance && s.output_res == 2);
+                 // Startup patch settings still describe the already applied guest patches.
+-                assert(s.startup_upscaler == requested);
++                assert(s.startup_upscaler == UpscalerOff);
+                 ConfigureUpscalerSupport(fsr4, fsr411);
+                 assert(s.upscaler == (unsupported ? UpscalerFsr3 : requested));
+             }
