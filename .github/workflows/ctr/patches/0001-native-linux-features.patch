@@ -636,7 +636,7 @@ index 0000000000000000000000000000000000000000..ff09eb93a4a7f8994bd092df2c8e9d3a
 +    return 'DLC removed from the managed library'
 diff --git c/launcher/library_ui.py i/launcher/library_ui.py
 new file mode 100644
-index 0000000000000000000000000000000000000000..acffe9f0883af693208636fd477ca38cb7a42a06
+index 0000000000000000000000000000000000000000..3aa202d3f23aa0821e8722e19fef73fb55302cdf
 --- /dev/null
 +++ i/launcher/library_ui.py
 @@ -0,0 +1,285 @@
@@ -911,8 +911,8 @@ index 0000000000000000000000000000000000000000..acffe9f0883af693208636fd477ca38c
 +            catalogs = patches.available_patches(directory, '01.21', title)
 +            seen = set(patches.GAME_PATCH_KEYS.values())
 +            for key, file, meta in catalogs:
-+                if key in seen: continue
-+                seen.add(key)
++                if patches.selection_key(key) in seen: continue
++                seen.add(patches.selection_key(key))
 +                active = key in config.get('enabled', []) or (key not in config.get('disabled', []) and meta.get('isEnabled', 'false').lower() == 'true')
 +                row = Adw.SwitchRow(title=meta.get('Name', key), subtitle=file.name, active=active)
 +                row.connect('notify::active', self.toggle_patch, key, config_path)
