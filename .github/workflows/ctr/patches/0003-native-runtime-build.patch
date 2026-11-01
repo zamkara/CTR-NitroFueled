@@ -1,0 +1,33 @@
+diff --git i/src/runtime_net.c w/src/runtime_net.c
+index f087d17697948b981ea6df1e21039b958495e3d6..4356326789a055a4d762eb54cb3a939b81173c67 100644
+--- i/src/runtime_net.c
++++ w/src/runtime_net.c
+@@ -225,6 +225,7 @@ static int dw_swap_at(uintptr_t addr) {
+  * task+0x9c==0x10000 and task+0xe4==2 dumps the crypto-relevant task state
+  * (+0x100/+0x252/+0x264/+0x26c/+0x288../+0x360/+0x600/+0x700), ending all
+  * speculation about what the lobby crypto needs. Slow (one full scan), once. */
++#ifdef _WIN32
+ static void dw_dump_field(const char *name, const unsigned char *base, uint64_t off, uint64_t len) {
+     unsigned char buf[64];
+     if (len > sizeof buf) len = sizeof buf;
+@@ -234,7 +235,6 @@ static void dw_dump_field(const char *name, const unsigned char *base, uint64_t
+     hex[len * 2] = 0;
+     printf("Net: online: task+0x%llx %s = %s\n", (unsigned long long)off, name, hex);
+ }
+-#ifdef _WIN32
+ /* Whole-process scan (dev only): every committed readable region is searched for
+  * the 8-byte hello nonce; each hit verified as a lobby task (+0x9c==0x10000 and
+  * +0xe4==2) before dumping crypto-relevant state. Faults resume below. */
+diff --git i/src/runtime_services.c w/src/runtime_services.c
+index 2306a9616f61c7aa5073ebbca56ab0794af34134..1b1c380740420918569766dc0e5dfb0870ffbd59 100644
+--- i/src/runtime_services.c
++++ w/src/runtime_services.c
+@@ -354,7 +354,7 @@ static int trophy_trp(int id, unsigned char **png, uint64_t *png_size) {
+     if (fd<0) return -1;
+     unsigned char header[0x60];
+     int count=-1;
+-    char want[16]="";
++    char want[32]="";
+     if (id>=0) snprintf(want,sizeof(want),"TROP%03d.PNG",id);
+     if (runtime_file_read(fd,header,sizeof(header))==sizeof(header) && header[0]==0xDC && header[1]==0xA2) {
+         const uint32_t entries=(uint32_t)header[16]<<24|header[17]<<16|header[18]<<8|header[19];
