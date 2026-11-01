@@ -1,8 +1,8 @@
-diff --git a/docs/CUSA14876.md b/docs/CUSA14876.md
+diff --git c/docs/CUSA14876.md i/docs/CUSA14876.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..56a0ece72fca0861c9f94b4ebe207d1ed52600eb
 --- /dev/null
-+++ b/docs/CUSA14876.md
++++ i/docs/CUSA14876.md
 @@ -0,0 +1,76 @@
 +# CUSA14876 validation
 +
@@ -80,11 +80,11 @@ index 0000000000000000000000000000000000000000..56a0ece72fca0861c9f94b4ebe207d1e
 +with the Cairo renderer and an in-memory settings backend. CI builds the C binaries
 +before running the full suite in an isolated display; its result is tracked separately.
 +The launch-script overlay fixture was updated for the new JSON profile protocol.
-diff --git a/docs/FEATURES.md b/docs/FEATURES.md
+diff --git c/docs/FEATURES.md i/docs/FEATURES.md
 new file mode 100644
 index 0000000000000000000000000000000000000000..aff70efa3d54328caefd9ef864ac128fd60ab6d9
 --- /dev/null
-+++ b/docs/FEATURES.md
++++ i/docs/FEATURES.md
 @@ -0,0 +1,101 @@
 +# Linux launcher features and validation
 +
@@ -187,11 +187,11 @@ index 0000000000000000000000000000000000000000..aff70efa3d54328caefd9ef864ac128f
 +The windowed size was assigned by the tiling compositor. This test used the newly
 +compiled runtime with the installed renderer. Live menu toggling was checked at
 +the settings/persistence layer, not by an automated mouse interaction with the game.
-diff --git a/gpu/CMakeLists.txt b/gpu/CMakeLists.txt
-index 0db2870f1b4547a6ebaf04e13ed742e53a6f18a0..a0a38cac985c4a59d63157c2ec2cb581336f9068 100644
---- a/gpu/CMakeLists.txt
-+++ b/gpu/CMakeLists.txt
-@@ -197,7 +197,8 @@ target_compile_definitions(bbgpu PRIVATE IMGUI_IMPL_VULKAN_NO_PROTOTYPES
+diff --git c/gpu/CMakeLists.txt i/gpu/CMakeLists.txt
+index 7cf0bd4f37b6568c6331bdf99f5ddf1101d224dc..a8db60bee50097c765c8576206bfe0a9342d7d1d 100644
+--- c/gpu/CMakeLists.txt
++++ i/gpu/CMakeLists.txt
+@@ -199,7 +199,8 @@ target_compile_definitions(bbgpu PRIVATE IMGUI_IMPL_VULKAN_NO_PROTOTYPES
      BB_FONT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/third_party/fonts/DejaVuSans.ttf")
  set_source_files_properties(shim/bbport_overlay.cpp PROPERTIES
      OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/fonts/DejaVuSans.ttf")
@@ -201,7 +201,7 @@ index 0db2870f1b4547a6ebaf04e13ed742e53a6f18a0..a0a38cac985c4a59d63157c2ec2cb581
  target_compile_definitions(bbgpu PRIVATE BOOST_ASIO_STANDALONE NDEBUG)
  target_compile_options(bbgpu PRIVATE -Wno-deprecated-declarations -Wno-missing-field-initializers)
  # Loaded with bb-probe at startup (DT_NEEDED, never dlopen): thread_local access without a
-@@ -215,7 +216,6 @@ if (WIN32)
+@@ -218,7 +219,6 @@ if (WIN32)
      # <windows.h> out of the way of std::min/max and the Vulkan/SDL headers.
      target_compile_definitions(bbgpu PUBLIC NOMINMAX WIN32_LEAN_AND_MEAN)
      target_compile_options(bbgpu PRIVATE -include ${CMAKE_CURRENT_SOURCE_DIR}/shim/bb_win_compat.h)
@@ -209,19 +209,19 @@ index 0db2870f1b4547a6ebaf04e13ed742e53a6f18a0..a0a38cac985c4a59d63157c2ec2cb581
      target_link_libraries(bbgpu PUBLIC Vulkan::Vulkan ws2_32 bcrypt ntdll synchronization winmm)
  else()
      target_link_libraries(bbgpu PUBLIC PkgConfig::X11)
-diff --git a/gpu/shim/bbport_overlay.cpp b/gpu/shim/bbport_overlay.cpp
-index 0d98669183b649f18d69b652184ae11407a8ac31..9036ed527c8e3843590f7a511e2af0055c217408 100644
---- a/gpu/shim/bbport_overlay.cpp
-+++ b/gpu/shim/bbport_overlay.cpp
-@@ -532,9 +532,19 @@ void Menu() {
+diff --git c/gpu/shim/bbport_overlay.cpp i/gpu/shim/bbport_overlay.cpp
+index 8a7fd1c781e5fb6c5b23e2a2f5a214de4e02961b..85fb1814ff2fb079ac5835535a146f635b798b59 100644
+--- c/gpu/shim/bbport_overlay.cpp
++++ i/gpu/shim/bbport_overlay.cpp
+@@ -727,9 +727,19 @@ void Menu() {
          const int current = std::clamp(s.temporal.load(), 0, BbSettings::TemporalCount - 1);
-         if (ImGui::BeginCombo(BbSettings::MenuText("Upscaling", "Апскейл"), labels[current])) {
-             for (int t = 0; t < BbSettings::TemporalCount; ++t) {
+         if (ImGui::BeginCombo(BbSettings::MenuText("Upscaling", "Апскейл"), BbSettings::Label(labels[current]))) {
+             for (const int t : order) {
 +#ifndef _WIN32
 +                // The NGX bridge in this source tree only implements Windows.
 +                ImGui::BeginDisabled(t == BbSettings::TemporalDlss);
 +#endif
-                 if (ImGui::Selectable(labels[t], t == current)) {
+                 if (ImGui::Selectable(BbSettings::Label(labels[t]), t == current)) {
                      Store(s.temporal, t, t != current);
                  }
 +#ifndef _WIN32
@@ -233,10 +233,10 @@ index 0d98669183b649f18d69b652184ae11407a8ac31..9036ed527c8e3843590f7a511e2af005
              }
              ImGui::EndCombo();
          }
-diff --git a/gpu/shim/window.cpp b/gpu/shim/window.cpp
+diff --git c/gpu/shim/window.cpp i/gpu/shim/window.cpp
 index ef0aed4915f5867dc50efba1115f2b6f112c59f9..2d556b1412d9e55d02a173c001b48b3633fea510 100644
---- a/gpu/shim/window.cpp
-+++ b/gpu/shim/window.cpp
+--- c/gpu/shim/window.cpp
++++ i/gpu/shim/window.cpp
 @@ -86,8 +86,8 @@ WindowSDL::WindowSDL(s32 width_, s32 height_, const char* title) : width{width_}
      const char* fullscreen_env = std::getenv("BB_FULLSCREEN");
      // SacredFire: the setting already folds BB_FULLSCREEN in (Load runs before the window is
@@ -248,11 +248,11 @@ index ef0aed4915f5867dc50efba1115f2b6f112c59f9..2d556b1412d9e55d02a173c001b48b36
      SDL_SetBooleanProperty(props, SDL_PROP_WINDOW_CREATE_FULLSCREEN_BOOLEAN, fullscreen);
      base_title = title;
      window = SDL_CreateWindowWithProperties(props);
-diff --git a/launcher/control_bindings.py b/launcher/control_bindings.py
+diff --git c/launcher/control_bindings.py i/launcher/control_bindings.py
 new file mode 100644
 index 0000000000000000000000000000000000000000..bc0466e0954de4a35cddaa09614bfd55e47e8ce6
 --- /dev/null
-+++ b/launcher/control_bindings.py
++++ i/launcher/control_bindings.py
 @@ -0,0 +1,136 @@
 +"""SDL binding names and the runtime's key.*/pad.* configuration format."""
 +import ctypes
@@ -390,11 +390,11 @@ index 0000000000000000000000000000000000000000..bc0466e0954de4a35cddaa09614bfd55
 +    name = aliases.get(name, name.upper() if len(name) == 1 else name)
 +    canonical = {choice.casefold():choice for choice in choices('key')}
 +    return canonical.get(name.casefold())
-diff --git a/launcher/library.py b/launcher/library.py
+diff --git c/launcher/library.py i/launcher/library.py
 new file mode 100644
 index 0000000000000000000000000000000000000000..ff09eb93a4a7f8994bd092df2c8e9d3a1e8e3f0d
 --- /dev/null
-+++ b/launcher/library.py
++++ i/launcher/library.py
 @@ -0,0 +1,238 @@
 +# SPDX-License-Identifier: GPL-2.0-or-later
 +"""Local game library operations. Never modify the original dumps or imported saves."""
@@ -634,11 +634,11 @@ index 0000000000000000000000000000000000000000..ff09eb93a4a7f8994bd092df2c8e9d3a
 +        raise ValueError('The package is not a matching DLC')
 +    source.unlink()
 +    return 'DLC removed from the managed library'
-diff --git a/launcher/library_ui.py b/launcher/library_ui.py
+diff --git c/launcher/library_ui.py i/launcher/library_ui.py
 new file mode 100644
 index 0000000000000000000000000000000000000000..acffe9f0883af693208636fd477ca38cb7a42a06
 --- /dev/null
-+++ b/launcher/library_ui.py
++++ i/launcher/library_ui.py
 @@ -0,0 +1,285 @@
 +# SPDX-License-Identifier: GPL-2.0-or-later
 +"""GTK library pages using the launcher's existing Adwaita components."""
@@ -925,11 +925,11 @@ index 0000000000000000000000000000000000000000..acffe9f0883af693208636fd477ca38c
 +        except (OSError, ValueError) as error:
 +            self.library_error(error)
 +        return False
-diff --git a/launcher/native_update.py b/launcher/native_update.py
+diff --git c/launcher/native_update.py i/launcher/native_update.py
 new file mode 100644
 index 0000000000000000000000000000000000000000..56a55e5eb8fac867ebddc1460fa76972b3987f06
 --- /dev/null
-+++ b/launcher/native_update.py
++++ i/launcher/native_update.py
 @@ -0,0 +1,61 @@
 +"""Explicit update checks for the native package; no background polling or telemetry."""
 +import json
@@ -992,10 +992,958 @@ index 0000000000000000000000000000000000000000..56a55e5eb8fac867ebddc1460fa76972
 +    if not installer.is_file():
 +        raise FileNotFoundError('Native installer is unavailable in this build')
 +    return ['xdg-terminal-exec', '--', '/usr/bin/bash', str(installer)]
-diff --git a/launcher/sacredfire_launcher.py b/launcher/sacredfire_launcher.py
+diff --git c/run.py i/run.py
+index 195919d6d0b97a1b246ac1246ce9b73947f8b5cb..172b0d84c14057f08944f4c008865e9e7d8b23a2 100644
+--- c/run.py
++++ i/run.py
+@@ -11,6 +11,7 @@ previous process to end first.
+ Works from the MSYS2 CLANG64 Python or a python.org Python.
+ """
+ import ctypes
++import json
+ import os
+ from pathlib import Path
+ import shutil
+@@ -293,17 +294,14 @@ def main():
+             fail(f'{game} has the PS4 PKG Tool layout (Image0 and Sc0): prepare it in the launcher first.')
+         fail(f'No eboot.bin in {game} (set BB_GAME_DIR to your {TITLE_ID} folder).')
+     # The game check compares the executable image with the supported one (CTR NF 1.21).
+-    check = subprocess.run([sys.executable, '-X', 'utf8', str(PORT / 'scripts' / 'game_check.py'), str(game)],
++    check = subprocess.run([sys.executable, '-X', 'utf8', str(PORT / 'scripts' / 'game_check.py'), str(game), '--json'],
+                            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, encoding='utf-8', errors='replace', creationflags=no_console())
+     if check.returncode:
+         fail(check.stdout.strip() or 'Game check failed.', 2)
+-    env['BB_GAME_PROFILE'] = check.stdout.strip() or 'ctr'
+-    # The game's own title ID and version: the European edition (CUSA14876) has its own patches.
+-    info = subprocess.run([sys.executable, '-X', 'utf8', str(PORT / 'scripts' / 'game_check.py'), '--info',
+-                           str(game)], stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, text=True,
+-                          encoding='utf-8', errors='replace', creationflags=no_console()).stdout.split()
+-    title_id, app_version = (info + [TITLE_ID, APP_VERSION][len(info):])[:2]
++    profile = json.loads(check.stdout)
++    title_id, app_version = profile['title'], profile['version']
++    env['BB_GAME_PROFILE'] = profile['name']
+     say(f'Game profile: {env["BB_GAME_PROFILE"]} ({title_id} {app_version})')
+ 
+     # UltraWide v1.0 by tcosi: dispatch the selected aspect-ratio patch (Settings > Display). Made for
+diff --git c/run.sh i/run.sh
+index b9b8f85465e7e82b62b0560bab034f9eeb222dbc..75a25273c0dcfc61cc396be0052eaaa839f96a0a 100755
+--- c/run.sh
++++ i/run.sh
+@@ -50,9 +50,10 @@ if [[ -z ${PYTHON:-} ]]; then echo 'Install Python 3 or set PYTHON.' >&2; exit 1
+ game=${BB_GAME_DIR:-orig/CUSA13795}
+ if [[ ! -f $game/eboot.bin ]]; then echo "No eboot.bin in $game (set BB_GAME_DIR)." >&2; exit 1; fi
+ # The game check (scripts/game_check.py) compares the executable image with the supported one
+-# (Crash Team Racing Nitro-Fueled CUSA13795 1.21) and names the profile the runtime reads.
+-profile=$("$PYTHON" scripts/game_check.py "$game") || { echo "$profile" >&2; exit 2; }
+-export BB_GAME_PROFILE=${profile:-ctr}
++# (registered CTR 1.21 editions) and names the profile the runtime reads.
++profile_info=$("$PYTHON" scripts/game_check.py "$game" --json) || { echo "$profile_info" >&2; exit 2; }
++read -r profile title_id app_version < <("$PYTHON" -c 'import json,sys; p=json.load(sys.stdin); print(p["name"],p["title"],p["version"])' <<< "$profile_info")
++export BB_GAME_PROFILE=$profile
+ echo "Game profile: $BB_GAME_PROFILE"
+ original_game=$game
+ game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
+@@ -68,18 +69,23 @@ fi
+ "$PYTHON" scripts/link_modules.py "$game" --out "$out" --modules libc.prx libSceFios2.prx libSceNpToolkit2.prx
+ # SacredFire: symbol names for this eboot's host-side imports (shadPS4's aerolib list, fetched once).
+ "$PYTHON" tools/gen_import_names.py --out "$out"
+-"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}"
++"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}" --dlc-dir "${BB_DLC_DIR:-$data/dlc}"
+ # The game runs at its own 30 FPS against a 60 Hz vblank unless the 60 FPS patch is on. Patches
+ # come from patches/CrashTeamRacing.xml (community patches by illusion and TroyWarez, from
+ # https://github.com/illusionyy/PS-Game-Patch), chosen in the in-game menu (bbport.ini patch_*
+ # keys) or patches.json; BB_PATCHES_DIR adds a folder of further shadPS4-format XML files.
+ fps=${BB_FPS:-30}
+-"$PYTHON" scripts/patches.py --patches-dir "${BB_PATCHES_DIR:-patches}" --patches-config "${BB_PATCHES_CONFIG:-$data/patches.json}" \
+-    --app-version 01.21 --title-id CUSA13795 --out "$out" --settings "$BB_CONFIG"
++"$PYTHON" scripts/patches.py --patches-dir "${BB_PATCHES_DIR:-$data/patches}" --patches-config "${BB_PATCHES_CONFIG:-$data/patches.json}" \
++    --app-version "$app_version" --title-id "$title_id" --out "$out" --settings "$BB_CONFIG"
+ patch_args=(--patches "$out/patches.bin")
+ # BB_NEO=1: PS4 Pro mode (sceKernelIsNeoMode, 7-CPU mode, 5568 MiB direct memory); the game then
+ # picks its Pro rendering path. Off by default: the Steam Deck is closer to a base PS4.
+ export BB_NEO=${BB_NEO:-0}
++render_config=$("$PYTHON" scripts/render_config.py --settings "$BB_CONFIG" --neo "$BB_NEO" --memory "${BB_DMEM_MB:-0}")
++IFS=$'\t' read -r BB_NEO render_memory render_label <<< "$render_config"
++export BB_NEO
++if (( render_memory > 0 )); then export BB_DMEM_MB=$render_memory; fi
++echo "Internal resolution: $render_label"
+ echo "PS4 Pro mode: ${BB_NEO} (BB_NEO=1 turns it on)"
+ # The on-disk shader/pipeline cache (user/cache/CUSA13795) is kept across launches: the GPU
+ # library preloads every pipeline from earlier sessions at start, so areas seen before no longer
+@@ -87,7 +93,7 @@ echo "PS4 Pro mode: ${BB_NEO} (BB_NEO=1 turns it on)"
+ # deletes it first; the fur breakage that once forced a clear per launch is fixed
+ # (docs/sacredfire/06-fur.md: geometry specialization and preload fetch shader).
+ if [[ ${BB_CLEAR_SHADER_CACHE:-0} == 1 ]]; then
+-    rm -rf "${BB_USER_DIR:-$data/user}/cache/CUSA13795"
++    rm -rf "${BB_USER_DIR:-$data/user}/cache/$title_id"
+     echo "Shader cache: cleared for this launch (BB_CLEAR_SHADER_CACHE=1)"
+ fi
+ # With the 60 FPS patch the game's own limiter paces frames; a 60 Hz virtual vblank would
+@@ -192,14 +198,22 @@ echo "SacredFire ${version:-unknown version}"
+ export BB_GPU_USER_DIR=${BB_USER_DIR:-$data/user}
+ mkdir -p "$BB_GPU_USER_DIR"
+ probe_args=("$out/boot-linked.bin" --import-names "$out/import_names.txt" --content-profile "$out/content.bin" "${patch_args[@]}" --app0 "$game" --user "${BB_USER_DIR:-$data/user}" --timeout "${BB_TIMEOUT:-0}" "$@")
+-if [[ -n ${mod_game:-} ]]; then
+-    "$probe" "${probe_args[@]}" &
+-    mod_pid=$!
+-    trap 'kill -TERM "$mod_pid" 2>/dev/null || true' TERM INT
+-    mod_status=0
+-    wait "$mod_pid" || mod_status=$?
+-    # An interrupted wait must finish the child before removing its mounted view.
+-    if kill -0 "$mod_pid" 2>/dev/null; then wait "$mod_pid" || mod_status=$?; fi
+-    exit "$mod_status"
++# Wait instead of exec so the in-game Apply and restart action works on Linux too.
++"$probe" "${probe_args[@]}" &
++game_pid=$!
++trap 'kill -TERM "$game_pid" 2>/dev/null || true' TERM INT
++game_status=0
++wait "$game_pid" || game_status=$?
++if kill -0 "$game_pid" 2>/dev/null; then wait "$game_pid" || game_status=$?; fi
++if (( game_status == 75 )); then
++    if [[ -n ${mod_game:-} ]]; then
++        "$PYTHON" -c 'import shutil,sys; shutil.rmtree(sys.argv[1])' "$mod_game"
++    fi
++    trap - EXIT
++    export BB_GAME_DIR=$original_game
++    # Preserve the in-game display choice across a full process restart.
++    saved_fullscreen=$("$PYTHON" -c 'import sys; sys.path.insert(0,"scripts"); from patches import read_settings; from pathlib import Path; print(read_settings(Path(sys.argv[1])).get("fullscreen",sys.argv[2]))' "$BB_CONFIG" "${BB_FULLSCREEN:-0}")
++    export BB_FULLSCREEN=$saved_fullscreen
++    exec bash "$0" "$@"
+ fi
+-exec "$probe" "${probe_args[@]}"
++exit "$game_status"
+diff --git c/scripts/game_check.py i/scripts/game_check.py
+index 9249046ed8ef44dff2a0a02330814f5d07045b45..81455ad6be6b13614cde17ed48f859fad503bdb2 100644
+--- c/scripts/game_check.py
++++ i/scripts/game_check.py
+@@ -1,23 +1,25 @@
+ #!/usr/bin/env python3
+ """The game files this port runs, keyed on the executable's loaded image.
+ 
+-Profile: Crash Team Racing Nitro-Fueled CUSA13795 with the 1.21 update merged in. The check
++Profiles: Crash Team Racing Nitro-Fueled CUSA13795 and the verified CUSA14876 1.21 build. The check
+ compares the loaded executable image, whose hash is the same whatever tool dumped it (the SELF
+ headers around it differ). BB_SKIP_GAME_CHECK=1 skips it. bbport's Bloodborne profile was removed
+ on 2026-10-09.
+ 
+ Two builds of the 1.21 update exist: the one rebuilt for firmware 5.05 (sdk_ver=05050000 in
+ param.sfo; the image in SUPPORTED, which the port was developed on) and the original one for
+-firmware 6.72+. Same game, different executable. A 1.21 executable that is not a known old one is
++firmware 6.72+. Same game, different executable. For CUSA13795 only, a 1.21 executable that is not a known old one is
+ accepted as `variant='6.72+'`: patches.py finds its patch sites by signature instead of address,
+ and the log says it is the less-tested build.
+ 
+-The European edition (CUSA14876) is accepted by title at any version (variant='eu'), as in
++The European edition (CUSA14876) requires the verified 1.21 executable. As in
+ martijnhe's OCTR-NitroFueled-PC-EU: its 1.21 runs the same code as the USA 1.21 build, so the
+ community patches come from patches/CrashTeamRacingEU.xml (the 1.21 signatures, and the 1.00
+ base game's own) and the render patches apply by signature.
+ """
+ import hashlib
++import argparse
++import json
+ import os
+ import struct
+ import sys
+@@ -31,17 +33,19 @@ SUPPORTED = {
+         name='ctr', title='CUSA13795', version='01.21', game='Crash Team Racing Nitro-Fueled', update='CUSA13795-patch',
+         modules=('libc.prx', 'libSceFios2.prx', 'libSceNpToolkit2.prx'), patches=True),
+ }
++# Loaded-image hashes verified from the CUSA14876 base and 1.21 update.
++# Do not accept an unknown regional executable just because its SFO claims version 1.21.
++EU_IMAGE = '6b93d1f682fbfc5340dfd08360c8c0522a40f34585ec525c41537c40772bb39c'
++EU_BASE_IMAGE = 'da391ad520838261ec4421636afd4bd1d178ee63623333b035e42fc219f1f855'
++SUPPORTED[EU_IMAGE] = dict(
++    name='ctr', title='CUSA14876', version='01.21', game='Crash Team Racing Nitro-Fueled',
++    update='CUSA14876-patch', modules=('libc.prx', 'libSceFios2.prx', 'libSceNpToolkit2.prx'),
++    patches=True, variant='validated-1.21')
+ BY_TITLE = {p['title']: p for p in SUPPORTED.values()}
+-# Editions accepted by title at any version, whatever their executable.
+-EDITIONS = {
+-    'CUSA14876': dict(
+-        name='ctr', title='CUSA14876', version='01.21', game='Crash Team Racing Nitro-Fueled (EU)',
+-        update='CUSA14876-patch', modules=('libc.prx', 'libSceFios2.prx', 'libSceNpToolkit2.prx'),
+-        patches=True),
+-}
+ # Images that are known NOT to be 1.21: the base game's executable (1.00). With a 1.21 param.sfo
+ # these mean the update's eboot.bin was not copied in.
+ OLD_IMAGES = {
++    EU_BASE_IMAGE: '01.00',
+     'a9cdc80f2170624e08bdddab128fc9cdaf5c71aa90c00fc669d830e366ba6833': '01.00',
+ }
+ SUPPORTED_TITLE = 'CUSA13795'
+@@ -68,10 +72,10 @@ def profile(game, image_hash=None):
+     except (OSError, ValueError, IndexError, StopIteration, KeyError):
+         image_hash = None
+     if image_hash in SUPPORTED:
+-        return dict(SUPPORTED[image_hash], variant='5.05')
+-    edition = sfo_info(game).get('TITLE_ID')
+-    if edition in EDITIONS:
+-        return dict(EDITIONS[edition], version=sfo_info(game).get('APP_VER', '?'), variant='eu')
++        if problem(game, image_hash) is not None:
++            return None
++        found = SUPPORTED[image_hash]
++        return dict(found, variant=found.get('variant', '5.05'))
+     if image_hash and problem(game, image_hash) is None and os.environ.get('BB_SKIP_GAME_CHECK') != '1':
+         info = sfo_info(game)
+         return dict(BY_TITLE[info['TITLE_ID']], variant='6.72+')
+@@ -140,32 +144,40 @@ def problem(game, image_hash=None):
+     except (OSError, ValueError, IndexError):
+         info = {}
+     title, version = info.get('TITLE_ID', '?'), info.get('APP_VER', '?')
+-    if title in EDITIONS:
+-        damaged = damaged_archives(game)
+-        return ('damaged_archives', title, version) if damaged else None
+     try:
+         image_hash = image_hash or image_sha256(game)
+     except (OSError, ValueError, IndexError, StopIteration, KeyError):
+         return 'unreadable', title, version
+-    if image_hash not in SUPPORTED:
+-        if title not in BY_TITLE:
+-            return 'other_title', title, version
+-        if version != BY_TITLE[title]['version']:
++    if image_hash in SUPPORTED:
++        expected = SUPPORTED[image_hash]
++        if title != expected['title']:
++            return 'identity_mismatch', title, version
++        if version != expected['version']:
+             return 'missing_update', title, version
+-        if image_hash in OLD_IMAGES:
+-            return 'wrong_eboot', title, version
+-        # otherwise another 1.21 build (6.72+): accepted, see the module docstring
++        if damaged_archives(game):
++            return 'damaged_archives', title, version
++        return None
++    if title not in BY_TITLE:
++        return 'other_title', title, version
++    if version != BY_TITLE[title]['version']:
++        return 'missing_update', title, version
++    if image_hash in OLD_IMAGES:
++        return 'wrong_eboot', title, version
++    if title == 'CUSA14876':
++        return 'unrecognized_build', title, version
+     if damaged_archives(game):
+         return 'damaged_archives', title, version
+-    return None
++    return None  # another 1.21 build (6.72+): accepted, see the module docstring
+ 
+ 
+ def explain(kind, title, version):
+     """What is wrong and what to do, for the log (English)."""
+     found = f'Found {title} version {version} (sce_sys/param.sfo).'
+     p = BY_TITLE.get(title, BY_TITLE[SUPPORTED_TITLE])
+-    supported = ', '.join(f"{q['game']} {q['title']} {q['version']}" for q in SUPPORTED.values())
++    supported = ', '.join(f"{q['game']} {q['title']} {q['version']}" for q in BY_TITLE.values())
+     return {
++        'identity_mismatch': f'{found} The executable belongs to a different registered edition. Use matching base and update files.',
++        'unrecognized_build': f'{found} This executable has not been validated for this edition. Use the supported decrypted 1.21 update; do not rename its metadata.',
+         'missing_update': f"{found} The port needs the {p['version']} update merged into the game folder: copy "
+                           f"everything from the dumped {p['version']} update (e.g. {p['update']}) into the "
+                           'game folder, replacing files (eboot.bin and sce_sys too).',
+@@ -187,13 +199,16 @@ def explain(kind, title, version):
+ 
+ if __name__ == '__main__':
+     # game_check.py GAME_DIR: prints the profile name (run.sh branches on it), or fails with the reason.
+-    # game_check.py --info GAME_DIR: prints "TITLE_ID APP_VER" (run.py passes them to patches.py).
+-    args = sys.argv[1:]
+-    if args[:1] == ['--info']:
+-        info = sfo_info(Path(args[1]) if len(args) > 1 else Path('.'))
++    parser = argparse.ArgumentParser(description='Validate a prepared game and report its runtime profile.')
++    parser.add_argument('game', type=Path, nargs='?', default=Path('.'))
++    parser.add_argument('--json', action='store_true', help='print validated profile metadata')
++    parser.add_argument('--info', action='store_true', help='print title and version metadata')
++    args = parser.parse_args()
++    game = args.game
++    if args.info:
++        info = sfo_info(game)
+         print(info.get('TITLE_ID', SUPPORTED_TITLE), info.get('APP_VER', SUPPORTED_VERSION))
+         sys.exit()
+-    game = Path(args[0]) if args else Path('.')
+     found = problem(game)
+     if found:
+         message = 'Unsupported game files: ' + explain(*found)
+@@ -202,5 +217,5 @@ if __name__ == '__main__':
+             message += f' Damaged ({len(damaged)}): ' + ', '.join(damaged[:10]) + (', ...' if len(damaged) > 10 else '')
+         sys.exit(message)
+     p = profile(game)
+-    print(p['name'] if p else 'unknown')
++    print(json.dumps(p) if args.json else (p['name'] if p else 'unknown'))
+ 
+diff --git c/scripts/patches.py i/scripts/patches.py
+index a010d9a9178effb5a34e92e8db52ba75ae8cd552..d17879b410ca476aa4ec8b65e7fe01c7699632b2 100644
+--- c/scripts/patches.py
++++ i/scripts/patches.py
+@@ -207,6 +207,15 @@ def external_patches(directory, app_version=APP_VERSION, title_id=TITLE_ID):
+     return found
+ 
+ 
++def available_patches(directory, app_version=APP_VERSION, title_id=TITLE_ID):
++    """Bundled patches plus user XML; a user entry with the same key overrides the bundle."""
++    bundled = Path(__file__).resolve().parent.parent / 'patches'
++    found = {key: (key, path, meta) for key, path, meta in external_patches(bundled, app_version, title_id)}
++    if Path(directory).resolve() != bundled.resolve():
++        found.update({key: (key, path, meta) for key, path, meta in external_patches(directory, app_version, title_id)})
++    return list(found.values())
++
++
+ def external_selection(found, config, ini=None):
+     """Selected patches: patches.json {"enabled": [...], "disabled": [...]} overrides each file's
+     isEnabled; bbport.ini patch_* keys (GAME_PATCH_KEYS, the in-game menu) add to it."""
+@@ -273,7 +282,7 @@ def main():
+     a=p.parse_args()
+     elf=(a.out/'eboot.elf').read_bytes()
+     segments=eboot_segments(elf)
+-    found=external_patches(a.patches_dir,a.app_version,a.title_id)
++    found=available_patches(a.patches_dir,a.app_version,a.title_id)
+     settings=read_settings(a.settings)
+     writes=compile_external(external_selection(found,a.patches_config,settings)+render_patches(settings),
+                             segments,elf)
+diff --git c/scripts/prepare.py i/scripts/prepare.py
+index a7ae9b93b40346cef722d569bae1008fdb561314..6e4316573dd981ef34a6ad7ac0136b8a68a5eba8 100644
+--- c/scripts/prepare.py
++++ i/scripts/prepare.py
+@@ -273,7 +273,7 @@ def prepare(game, out):
+     if game_profile and game_profile.get('variant'):
+         sdk = next((f.split('=', 1)[1] for f in str(report['sfo'].get('PUBTOOLINFO', '')).split(',')
+                     if f.startswith('sdk_ver=')), '?')
+-        print(f"Update build: {game_profile['version']} for firmware {game_profile['variant']} (param.sfo sdk_ver={sdk})"
++        print(f"Update build: {game_profile['title']} {game_profile['version']} ({game_profile['variant']}; sdk_ver={sdk})"
+               + ('' if game_profile['variant'] == '5.05' else '; patch sites are found by signature'))
+     print(f"{len(names)} imported symbols; {sum(counts.values()):,} relocations; {len(report['needed'])} required modules")
+     if missing:
+diff --git c/scripts/render_config.py i/scripts/render_config.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..466930d08914927d244453686d192bfd89375855
+--- /dev/null
++++ i/scripts/render_config.py
+@@ -0,0 +1,24 @@
++# SPDX-License-Identifier: GPL-2.0-or-later
++"""Resolve the same render plan for the Linux launcher and restart path."""
++import argparse
++from pathlib import Path
++from patches import read_settings, render_plan
++
++
++def configuration(settings, neo='0', memory='0'):
++    plan = render_plan(settings)
++    if not plan:
++        return str(neo), str(memory or '0'), 'Game default'
++    memory = int(memory or '0')
++    if plan['heap']:
++        memory = max(memory, 7168)
++    return ('1' if plan['pro'] else '0'), str(memory), plan['label']
++
++
++if __name__ == '__main__':
++    p = argparse.ArgumentParser(description=__doc__)
++    p.add_argument('--settings', required=True, type=Path)
++    p.add_argument('--neo', default='0')
++    p.add_argument('--memory', default='0')
++    a = p.parse_args()
++    print('\t'.join(configuration(read_settings(a.settings), a.neo, a.memory)))
+diff --git c/src/probe.c i/src/probe.c
+index f8f9c5edca0b4e5e3e261a91c5eef223d4d9d8a0..769714b3e86b0a0a0e3c5d89d39c72085aa9df22 100644
+--- c/src/probe.c
++++ i/src/probe.c
+@@ -522,14 +522,12 @@ static void apply_patches(const char *path, Segment *segments, uint64_t ns, cons
+     fclose(f);
+     printf("Patches: %" PRIu64 " writes, %" PRIu64 " bytes applied, %" PRIu64 " pointers rebased\n",count,bytes,rebased);
+ }
+-/* Restarts the game through run.sh (the settings menu: a new render resolution is a patch
+- * applied at start). Descriptors are closed first so the old GPU device and its memory are
+- * released before the new process opens its own. */
++/* Restarts through the platform wrapper after releasing the old process and GPU resources.
++ * New render-resolution patches and saved display settings are applied on the next launch. */
+ volatile int runtime_restarting;
+ void runtime_restart(void) {
+     fflush(NULL);
+-    /* The GPU threads still run until exec: their Vulkan calls fail once the device fd is
+-     * closed below, and an assertion there must not end the process (exit 23) before exec. */
++    /* Keep exit-time GPU failures from overriding a requested restart. */
+     runtime_restarting = 1;
+     __sync_synchronize();
+ #ifdef _WIN32
+@@ -559,11 +557,10 @@ void runtime_restart(void) {
+     /* The new launch waits for this process's GPU device to go away (run.py --after). */
+     TerminateProcess(GetCurrentProcess(),0);
+ #else
++    /* Let run.sh release this process's GPU resources and mod view before relaunching.
++     * The wrapper reloads saved display/render settings instead of inheriting stale overrides. */
+     puts("Runtime: restarting through run.sh");
+-    syscall(SYS_close_range, 3u, ~0u, 0u);
+-    execlp("bash", "bash", "run.sh", (char *)NULL);
+-    perror("runtime_restart: exec");
+-    _exit(1);
++    _exit(75);
+ #endif
+ }
+ 
+diff --git c/tests/test_control_bindings.py i/tests/test_control_bindings.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..bb38ef31cfcc0dafc9d8b44962e51ef42342bab8
+--- /dev/null
++++ i/tests/test_control_bindings.py
+@@ -0,0 +1,90 @@
++"""Runtime-compatible keyboard/gamepad names, validation and scoped resets."""
++from pathlib import Path
++import re
++import shutil
++import subprocess
++import tempfile
++import sys
++import unittest
++
++ROOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(ROOT / 'launcher'))
++import control_bindings as controls
++
++
++class BindingTests(unittest.TestCase):
++    def test_actions_match_the_runtime(self):
++        source = (ROOT / 'src/runtime_pad.c').read_text()
++        table = source.split('input_names[IN_COUNT]={', 1)[1].split('};', 1)[0]
++        actions = re.findall(r'"([a-z0-9_]+)"', table)
++        self.assertEqual(set(controls.KEY_DEFAULTS), set(actions))
++        self.assertEqual(set(controls.PAD_DEFAULTS), set(actions[:actions.index('move_up')]))
++
++    def test_reset_keeps_other_controls_settings_and_comments(self):
++        values = {'key.cross': 'F', 'pad.cross': 'x', 'show_fps': '1', 'custom.setting': 'yes'}
++        lines = ['# key.cross=note', 'key.cross=F', 'pad.cross=x', 'show_fps=1', 'custom.setting=yes']
++        reset, kept = controls.reset(values, lines, 'key')
++        self.assertNotIn('key.cross', reset)
++        self.assertEqual(reset['pad.cross'], 'x')
++        self.assertEqual(reset['custom.setting'], 'yes')
++        self.assertIn('# key.cross=note', kept)
++        self.assertNotIn('key.cross=F', kept)
++        self.assertEqual(controls.binding(reset, 'key', 'cross'), 'Space')
++
++    def test_explicit_unbound_is_distinct_from_default(self):
++        self.assertEqual(controls.binding({}, 'key', 'cross'), 'Space')
++        self.assertEqual(controls.binding({'key.cross': ''}, 'key', 'cross'), '')
++
++    def test_defaults_and_custom_values_are_valid_sdl_names(self):
++        try:
++            controls.sdl()
++        except OSError:
++            self.skipTest('SDL3 is required')
++        for prefix in ('key', 'pad'):
++            for action, value in controls.defaults(prefix).items():
++                with self.subTest(prefix=prefix, action=action):
++                    self.assertEqual(controls.normalized(prefix, value.split(',')), value)
++        self.assertEqual(controls.normalized('key', ['Space', 'F', 'Space', '']), 'Space,F')
++        self.assertEqual(controls.normalized('key', ['', '', '', '']), '')
++        for values in (['not-a-key'], ['A', 'B', 'C', 'D', 'E']):
++            with self.assertRaises(ValueError):
++                controls.normalized('key', values)
++
++
++    def test_displayed_defaults_match_compiled_runtime_constants(self):
++        compiler = shutil.which('cc')
++        if not compiler or not Path('/usr/include/SDL3/SDL_scancode.h').is_file():
++            self.skipTest('C compiler and SDL3 headers are required')
++        source = (ROOT / 'src/runtime_pad.c').read_text().split('static void bind_defaults(void)', 1)[1].split('    memset(bindings', 1)[0]
++        keyboard, pads = source.split('} pads[]={', 1)
++        rows = []
++        for prefix, text in (('key', keyboard), ('pad', pads)):
++            for action, constant in re.findall(r'\{IN_([A-Z0-9_]+),\s*(SDL_[A-Z0-9_]+|PAD_[A-Z0-9_]+)\}', text):
++                rows.append((prefix, action.lower(), constant))
++        lines = ['#include <stdio.h>', '#include <SDL3/SDL_scancode.h>', '#include <SDL3/SDL_gamepad.h>', 'int main(void) {']
++        for prefix, action, constant in rows:
++            if constant.startswith('SDL_'):
++                lines.append(f'printf("{prefix} {action} {constant} %d\\n", (int){constant});')
++        lines += ['return 0;', '}']
++        with tempfile.TemporaryDirectory() as folder:
++            executable = str(Path(folder) / 'constants')
++            subprocess.run([compiler, '-x', 'c', '-', '-o', executable], input='\n'.join(lines),
++                           text=True, check=True, capture_output=True, timeout=15)
++            output = subprocess.check_output([executable], text=True, timeout=3)
++        resolved = {}
++        for line in output.splitlines():
++            prefix, action, constant, number = line.split()
++            fn = controls.sdl().SDL_GetScancodeName if prefix == 'key' else controls.sdl().SDL_GetGamepadStringForButton
++            resolved[prefix, action, constant] = fn(int(number)).decode()
++        actual = {'key': {key: [] for key in controls.KEY_DEFAULTS},
++                  'pad': {key: [] for key in controls.PAD_DEFAULTS}}
++        for prefix, action, constant in rows:
++            if constant == 'PAD_LEFT_TRIGGER':
++                value = 'lefttrigger'
++            elif constant == 'PAD_RIGHT_TRIGGER':
++                value = 'righttrigger'
++            else:
++                value = resolved[prefix, action, constant]
++            actual[prefix][action].append(value)
++        for prefix in ('key', 'pad'):
++            self.assertEqual({k: ','.join(v) for k, v in actual[prefix].items()}, controls.defaults(prefix))
+diff --git c/tests/test_game_check.py i/tests/test_game_check.py
+index ee05a8de278027a4ec83539f48c4cae5b768f808..72ebce165b2bfc1b927701a92c432e6b48da47f8 100644
+--- c/tests/test_game_check.py
++++ i/tests/test_game_check.py
+@@ -41,11 +41,10 @@ class GameCheckTests(unittest.TestCase):
+     def tearDown(self):
+         self.tmp.cleanup()
+ 
+-    def test_european_edition_is_accepted_by_title(self):
++    def test_european_edition_rejects_unreadable_executable(self):
+         game = self.game('CUSA14876', '01.21', b'any executable')
+-        self.assertIsNone(game_check.problem(game))
+-        profile = game_check.profile(game)
+-        self.assertEqual((profile['name'], profile['title'], profile['variant']), ('ctr', 'CUSA14876', 'eu'))
++        self.assertEqual(game_check.problem(game)[0], 'unreadable')
++        self.assertIsNone(game_check.profile(game))
+ 
+     def test_base_game_without_the_update(self):
+         game = self.game('CUSA13795', '01.00')
+@@ -136,5 +135,37 @@ class GameCheckTests(unittest.TestCase):
+             self.assertIn('CUSA', game_check.explain(kind, 'CUSA00000', '01.00'))
+ 
+ 
++
++    def test_verified_cusa14876_update_is_recognized(self):
++        game = self.game('CUSA14876', '01.21')
++        with mock.patch.object(game_check, 'image_sha256', return_value=game_check.EU_IMAGE):
++            self.assertIsNone(game_check.problem(game))
++            profile = game_check.profile(game)
++            self.assertEqual(profile['title'], 'CUSA14876')
++            self.assertEqual(profile['name'], 'ctr')
++            self.assertEqual(profile['variant'], 'validated-1.21')
++
++    def test_unknown_cusa14876_executable_does_not_pass_by_metadata_alone(self):
++        game = self.game('CUSA14876', '01.21')
++        self.assertEqual(game_check.problem(game)[0], 'unrecognized_build')
++        self.assertIsNone(game_check.profile(game))
++
++    def test_cusa14876_base_requires_the_update(self):
++        game = self.game('CUSA14876', '01.00')
++        with mock.patch.object(game_check, 'image_sha256', return_value=game_check.EU_BASE_IMAGE):
++            self.assertEqual(game_check.problem(game)[0], 'missing_update')
++        game = self.game('CUSA14876', '01.21')
++        with mock.patch.object(game_check, 'image_sha256', return_value=game_check.EU_BASE_IMAGE):
++            self.assertEqual(game_check.problem(game)[0], 'wrong_eboot')
++
++    def test_known_executable_must_match_the_edition_metadata(self):
++        for title, image in (('CUSA13795', game_check.EU_IMAGE), ('CUSA14876', game_check.SUPPORTED_IMAGE)):
++            with self.subTest(title=title):
++                game = self.game(title, '01.21')
++                with mock.patch.object(game_check, 'image_sha256', return_value=image):
++                    self.assertEqual(game_check.problem(game)[0], 'identity_mismatch')
++                    self.assertIsNone(game_check.profile(game))
++
++
+ if __name__ == '__main__':
+     unittest.main()
+diff --git c/tests/test_launcher_startup.py i/tests/test_launcher_startup.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..b629614b006d1839083c592d10f4d7db67e1fd34
+--- /dev/null
++++ i/tests/test_launcher_startup.py
+@@ -0,0 +1,54 @@
++"""Direct-play startup behavior without spawning a game or a GTK window."""
++from pathlib import Path
++import sys
++import tempfile
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(ROOT / 'launcher'))
++
++try:
++    import sacredfire_launcher as launcher
++except (ImportError, ValueError):
++    launcher = None
++
++
++@unittest.skipIf(launcher is None, 'GTK4 and libadwaita are required')
++class DirectPlayTests(unittest.TestCase):
++    def test_unconfigured_shortcut_opens_setup_instead_of_exiting_silently(self):
++        settings = {**launcher.DEFAULTS, 'game_dir': ''}
++        with patch.object(launcher, 'load_settings', return_value=settings), \
++             patch.object(launcher, 'LauncherApp') as app, \
++             patch.object(launcher.os, 'execvpe') as execute:
++            app.return_value.run.return_value = 0
++            self.assertEqual(launcher.play(), 0)
++            app.return_value.run.assert_called_once_with([])
++            execute.assert_not_called()
++
++    def test_missing_game_directory_also_opens_setup(self):
++        with tempfile.TemporaryDirectory() as folder:
++            settings = {**launcher.DEFAULTS, 'game_dir': str(Path(folder) / 'missing')}
++            with patch.object(launcher, 'load_settings', return_value=settings), \
++                 patch.object(launcher, 'LauncherApp') as app, \
++                 patch.object(launcher.os, 'execvpe') as execute:
++                app.return_value.run.return_value = 0
++                self.assertEqual(launcher.play(), 0)
++                app.return_value.run.assert_called_once_with([])
++                execute.assert_not_called()
++
++    def test_configured_shortcut_uses_saved_game_settings(self):
++        with tempfile.TemporaryDirectory() as folder:
++            (Path(folder) / 'eboot.bin').write_bytes(b'fixture')
++            settings = {**launcher.DEFAULTS, 'game_dir': folder, 'fullscreen': True}
++            with patch.object(launcher, 'load_settings', return_value=settings), \
++                 patch.object(launcher, 'LauncherApp') as app, \
++                 patch.object(launcher.os, 'chdir'), \
++                 patch.object(launcher.os, 'execvpe') as execute:
++                launcher.play()
++                app.assert_not_called()
++                executable, args, env = execute.call_args.args
++                self.assertEqual(executable, 'bash')
++                self.assertEqual(args, ['bash', str(launcher.PORT_DIR / 'run.sh')])
++                self.assertEqual(env['BB_GAME_DIR'], folder)
++                self.assertEqual(env['BB_FULLSCREEN'], '1')
+diff --git c/tests/test_library.py i/tests/test_library.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..0ea1804e00bcb0e197527852cdcd2e01f49866a9
+--- /dev/null
++++ i/tests/test_library.py
+@@ -0,0 +1,179 @@
++"""Library file operations: recovery, identity, validation and source preservation."""
++import json
++import os
++from pathlib import Path
++import struct
++import sys
++import tempfile
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(ROOT / 'launcher'))
++import library
++sys.path.insert(0, str(ROOT / 'scripts'))
++import render_config
++
++
++def sfo_bytes(values):
++    keys = data = b''
++    entries = []
++    for key, value in values.items():
++        value = str(value).encode() + b'\0'
++        entries.append((len(keys), 0x204, len(value), len(value), len(data)))
++        keys += key.encode() + b'\0'
++        data += value
++    offset = 20 + 16 * len(entries)
++    return struct.pack('<4sIIII', b'\0PSF', 0x101, offset, offset + len(keys), len(entries)) + b''.join(struct.pack('<HHIII', *e) for e in entries) + keys + data
++
++
++class LibraryTests(unittest.TestCase):
++    def setUp(self):
++        self.temp = tempfile.TemporaryDirectory()
++        self.addCleanup(self.temp.cleanup)
++        self.root = Path(self.temp.name)
++        self.active = self.root / 'user/savedata/1/CUSA14876'
++        self.backups = self.root / 'backups'
++
++    def slot(self, root, value, name='slot'):
++        (root / name).mkdir(parents=True)
++        (root / name / 'data').write_text(value)
++        meta = root / (name + '.sce_sys')
++        meta.mkdir()
++        (meta / 'param.bin').write_bytes(bytes(1328))
++        return root
++
++    def test_import_backs_up_and_replaces_complete_slot_preserving_other_slots(self):
++        self.slot(self.active, 'old')
++        self.slot(self.active, 'keep', 'other')
++        (self.active / 'slot/obsolete').write_text('stale')
++        source = self.slot(self.root / 'import', 'new')
++        library.import_saves(source, self.active, self.backups, 'CUSA14876')
++        self.assertEqual((self.active / 'slot/data').read_text(), 'new')
++        self.assertFalse((self.active / 'slot/obsolete').exists())
++        self.assertEqual((self.active / 'other/data').read_text(), 'keep')
++        backup = next(self.backups.iterdir())
++        self.assertEqual((backup / 'slot/data').read_text(), 'old')
++        self.assertEqual((source / 'slot/data').read_text(), 'new')
++        self.assertEqual(json.loads((backup / '.ctr-save.json').read_text())['title'], 'CUSA14876')
++
++    def test_restore_replaces_all_slots_and_preserves_backup(self):
++        self.slot(self.active, 'old')
++        source = self.slot(self.root / 'restore', 'restored', 'restored')
++        library.install_saves(source, self.active, self.backups, replace=True, title='CUSA14876')
++        self.assertFalse((self.active / 'slot').exists())
++        self.assertEqual((self.active / 'restored/data').read_text(), 'restored')
++        self.assertTrue(any(self.backups.iterdir()))
++
++    def test_failed_backup_leaves_active_save_untouched(self):
++        self.slot(self.active, 'old')
++        source = self.slot(self.root / 'import', 'new')
++        with patch.object(library, 'backup', side_effect=OSError('disk full')):
++            with self.assertRaises(OSError): library.install_saves(source, self.active, self.backups)
++        self.assertEqual((self.active / 'slot/data').read_text(), 'old')
++
++    def test_publish_failure_rolls_back(self):
++        self.slot(self.active, 'old')
++        source = self.slot(self.root / 'import', 'new')
++        rename = Path.rename
++        def fail_ready(path, target):
++            if path.name == 'ready': raise OSError('publication failed')
++            return rename(path, target)
++        with patch.object(Path, 'rename', fail_ready):
++            with self.assertRaises(OSError): library.install_saves(source, self.active, self.backups)
++        self.assertEqual((self.active / 'slot/data').read_text(), 'old')
++
++    def test_unsafe_or_unrecognized_imports_cannot_overwrite_saves(self):
++        self.slot(self.active, 'old')
++        source = self.root / 'source'
++        source.mkdir()
++        for name in ('../escape', '.', '..', 'bad/name'):
++            with self.assertRaises(ValueError): library.safe_name(name)
++        (source / 'link').symlink_to(self.active, target_is_directory=True)
++        with self.assertRaises(ValueError): library.import_saves(source, self.active, self.backups, 'CUSA14876')
++        self.assertEqual((self.active / 'slot/data').read_text(), 'old')
++        with self.assertRaises(ValueError): library.install_saves(self.active, self.active, self.backups)
++
++    def test_cross_region_manifest_is_rejected(self):
++        source = self.slot(self.root / 'source', 'new')
++        (source / '.ctr-save.json').write_text('{"title":"CUSA13795"}')
++        with self.assertRaisesRegex(ValueError, 'another game edition'):
++            library.import_saves(source, self.active, self.backups, 'CUSA14876')
++        self.assertFalse(self.active.exists())
++
++    def test_decrypted_save_metadata_conversion_and_region_check(self):
++        source = self.root / 'decrypted'
++        (source / 'sce_sys').mkdir(parents=True)
++        (source / 'save.dat').write_bytes(b'game save')
++        values = {'TITLE_ID':'CUSA14876', 'SAVEDATA_DIRECTORY':'slot', 'MAINTITLE':'Title', 'SUBTITLE':'Checkpoint', 'DETAIL':'Details'}
++        (source / 'sce_sys/param.sfo').write_bytes(sfo_bytes(values))
++        with self.assertRaises(ValueError): library.import_saves(source, self.active, self.backups, 'CUSA13795')
++        library.import_saves(source, self.active, self.backups, 'CUSA14876')
++        blob = (self.active / 'slot.sce_sys/param.bin').read_bytes()
++        self.assertEqual(len(blob),1328)
++        self.assertEqual(blob[:128].rstrip(b'\0'),b'Title')
++        self.assertEqual((self.active / 'slot/save.dat').read_bytes(), b'game save')
++        self.assertFalse((self.active / 'slot/sce_sys').exists())
++
++    def test_export_is_new_and_rejects_recursive_target(self):
++        self.slot(self.active, 'old')
++        out = self.root / 'export'
++        library.copy_new(self.active, out)
++        with self.assertRaises(ValueError): library.copy_new(self.active, out)
++        with self.assertRaises(ValueError): library.copy_new(self.active, self.active / 'recursive')
++        self.assertEqual((out / 'slot/data').read_text(), 'old')
++
++    def test_dlc_validates_edition_and_preserves_original(self):
++        source = self.root / 'own.pkg'
++        source.write_bytes(b'fixture')
++        info = {'CATEGORY':'ac','TITLE_ID':'CUSA14876','CONTENT_ID':'EP0002-CUSA14876_00-CTRDELUXEPACK001'}
++        with patch.object(library.content_profile, 'pkg_param', return_value=info):
++            target = library.add_dlc(source, self.root / 'dlc', 'CUSA14876')
++            self.assertEqual(target.read_bytes(), b'fixture')
++            with self.assertRaises(ValueError): library.add_dlc(source, self.root / 'dlc', 'CUSA14876')
++            with self.assertRaises(ValueError): library.add_dlc(source, self.root / 'other', 'CUSA13795')
++        self.assertTrue(source.exists())
++
++    def test_game_preparation_merges_into_new_folder_and_preserves_sources(self):
++        base, update = self.root / 'base', self.root / 'update'
++        for folder, category, version in ((base,'gd','01.00'),(update,'gp','01.21')):
++            (folder / 'sce_sys').mkdir(parents=True)
++            (folder / 'sce_sys/param.sfo').write_bytes(sfo_bytes({'TITLE_ID':'CUSA14876','CATEGORY':category,'APP_VER':version}))
++            (folder / 'eboot.bin').write_bytes(version.encode())
++        (base / 'sce_module').mkdir()
++        for module in library.game_check.BY_TITLE['CUSA14876']['modules']:
++            (base / 'sce_module' / module).write_bytes(b'fixture module')
++        with patch.object(library.game_check, 'image_sha256', return_value=library.game_check.EU_IMAGE):
++            target = library.prepare_game(base, update, self.root / 'data')
++        self.assertEqual((target / 'eboot.bin').read_bytes(),b'01.21')
++        self.assertEqual((base / 'eboot.bin').read_bytes(),b'01.00')
++        self.assertEqual((update / 'eboot.bin').read_bytes(),b'01.21')
++        with patch.object(library.game_check, 'image_sha256', return_value='unverified'):
++            with self.assertRaises(ValueError): library.prepare_game(base, update, self.root / 'data')
++        self.assertEqual(len(list((self.root / 'data/prepared').iterdir())),1)
++
++    def test_remove_dlc_cannot_remove_an_external_original(self):
++        source = self.root / 'own.pkg'
++        source.write_bytes(b'fixture')
++        managed = self.root / 'dlc'
++        managed.mkdir()
++        with self.assertRaises(ValueError): library.remove_dlc(source, managed, 'CUSA14876')
++        target = managed / 'copy.pkg'
++        target.write_bytes(b'fixture')
++        info = {'CATEGORY':'ac','TITLE_ID':'CUSA14876','CONTENT_ID':'EP0002-CUSA14876_00-CTRDELUXEPACK001'}
++        with patch.object(library.content_profile,'pkg_param', return_value=info):
++            library.remove_dlc(target, managed, 'CUSA14876')
++        self.assertFalse(target.exists())
++        self.assertTrue(source.exists())
++
++    def test_render_plan_matches_windows_resolution_and_memory(self):
++        for value in ('480','720','1440','1620','2160'):
++            neo, memory, label = render_config.configuration({'render_res':value})
++            self.assertEqual(neo,'1')
++            self.assertIn(value,label)
++            self.assertEqual(memory, '7168' if value == '2160' else '0')
++        self.assertEqual(render_config.configuration({'render_res':'1080'})[:2],('0','0'))
++        self.assertEqual(render_config.configuration({'render_res':'2160'}, memory='8192')[1],'8192')
++
++
++if __name__ == '__main__': unittest.main()
+diff --git c/tests/test_mods.py i/tests/test_mods.py
+index 795f2f70bbf8c1ffcdb317f07983d0f1aa39cd9c..c4312401434ead1575f061e9c0028fbac0ebbcf5 100644
+--- c/tests/test_mods.py
++++ i/tests/test_mods.py
+@@ -135,11 +135,21 @@ class ModTests(unittest.TestCase):
+         with self.assertRaises(ValueError):
+             mods.selected(self.moddir, config)
+ 
++    def test_restart_recreates_overlay_and_keeps_original_game_source(self):
++        self.run_overlay(restart=True)
++
+     def test_run_uses_overlay_propagates_exit_and_cleans_view(self):
++        self.run_overlay(restart=False)
++
++    def run_overlay(self, restart):
+         self.mod('A')
+         python = self.root / 'python'
+         python.write_text(f'#!{sys.executable}\nimport subprocess,sys\n'
+-            'if sys.argv[1] == "scripts/mods.py" or sys.argv[1] == "-c":\n'
++            'if sys.argv[1] == "scripts/game_check.py":\n'
++            "    print('{\"name\":\"ctr\",\"title\":\"CUSA13795\",\"version\":\"01.21\"}')\n"
++            'elif sys.argv[1] == "scripts/render_config.py":\n'
++            '    print("0\\t0\\tGame default")\n'
++            'elif sys.argv[1] == "scripts/mods.py" or sys.argv[1] == "-c":\n'
+             '    sys.exit(subprocess.call([sys.executable,*sys.argv[1:]]))\n')
+         python.chmod(0o755)
+         probe = self.root / 'probe'
+@@ -147,13 +157,17 @@ class ModTests(unittest.TestCase):
+             'game=Path(sys.argv[sys.argv.index("--app0")+1])\n'
+             'Path(os.environ["BB_DATA_DIR"],"mounted.json").write_text(json.dumps({\n'
+             '"path":str(game),"content":(game/"dvdroot_ps4/chr/a.dcx").read_text()}))\n'
+-            'sys.exit(7)\n')
++            'record=Path(os.environ["BB_DATA_DIR"],"launches")\n'
++            'n=int(record.read_text()) if record.exists() else 0\n'
++            'record.write_text(str(n+1))\n'
++            f'sys.exit(75 if {restart!r} and n == 0 else 7)\n')
+         probe.chmod(0o755)
+         env = dict(os.environ, BB_PREBUILT='1', BB_PROBE=str(probe), PYTHON=str(python),
+             BB_DATA_DIR=str(self.root), BB_GAME_DIR=str(self.game),
+             BB_MODS_DIR=str(self.moddir), BB_MODS_ENABLED='1', BB_MODS_CONFIG=str(self.root/'mods.json'))
+         result = subprocess.run(['bash', 'run.sh'], cwd=ROOT, env=env, capture_output=True, timeout=30)
+         self.assertEqual(result.returncode, 7, result.stderr)
++        self.assertEqual((self.root / 'launches').read_text(), '2' if restart else '1')
+         mounted = json.loads((self.root / 'mounted.json').read_text())
+         self.assertEqual(mounted['content'], 'mod')
+         self.assertFalse(Path(mounted['path']).exists())
+diff --git c/tests/test_native_update.py i/tests/test_native_update.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..861e55be051c23d6733f0162c1c41133844839ae
+--- /dev/null
++++ i/tests/test_native_update.py
+@@ -0,0 +1,73 @@
++"""Native release validation and explicit update checks, using synthetic responses."""
++import io
++import json
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++from types import SimpleNamespace
++import unittest
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parent.parent
++sys.path.insert(0, str(ROOT / 'launcher'))
++import native_update as update
++
++
++def release():
++    tag = 'arch-' + 'a' * 40
++    names = ['ctr-nitrofueled-0.r300.gaaaaaaaaaaaa-1-x86_64.pkg.tar.zst', 'install.sh', 'SHA256SUMS']
++    return {'tag_name': tag, 'draft': False, 'prerelease': False, 'assets': [
++        {'name': n, 'browser_download_url': f'https://github.com/{update.REPOSITORY}/releases/download/{tag}/{n}'}
++        for n in names]}
++
++
++class UpdateTests(unittest.TestCase):
++    def test_stable_release_has_verified_asset_locations(self):
++        self.assertEqual(update.release_info(release())['version'], '0.r300.gaaaaaaaaaaaa-1')
++
++    def test_incomplete_or_untrusted_releases_are_rejected(self):
++        for mutation in ('draft', 'prerelease', 'missing', 'foreign', 'duplicate', 'tag'):
++            with self.subTest(mutation=mutation):
++                data = release()
++                if mutation in ('draft', 'prerelease'):
++                    data[mutation] = True
++                elif mutation == 'missing':
++                    data['assets'].pop()
++                elif mutation == 'foreign':
++                    data['assets'][0]['browser_download_url'] = 'https://example.invalid/payload'
++                elif mutation == 'duplicate':
++                    data['assets'].append(data['assets'][0])
++                else:
++                    data['tag_name'] = 'unexpected'
++                with self.assertRaises(ValueError):
++                    update.release_info(data)
++
++    def test_check_compares_installed_version_and_does_not_send_local_metadata(self):
++        with tempfile.TemporaryDirectory() as folder:
++            (Path(folder) / 'build-info.json').write_text(json.dumps({'commit': 'b' * 40, 'package_version': '0.r263.gbbbbbbbbbbbb-1'}))
++            for comparison, expected in (('-1', True), ('0', False), ('1', False)):
++                with self.subTest(comparison=comparison), \
++                     patch.object(update.urllib.request, 'urlopen', return_value=io.BytesIO(json.dumps(release()).encode())) as fetch, \
++                     patch.object(update.subprocess, 'run', return_value=SimpleNamespace(stdout=comparison)) as run:
++                    result = update.check(folder)
++                    self.assertEqual(result['update_available'], expected)
++                    request = fetch.call_args.args[0]
++                    self.assertEqual(request.full_url, update.API)
++                    self.assertIsNone(request.data)
++                    self.assertEqual(run.call_args.args[0][0], 'vercmp')
++
++    def test_check_failure_is_returned_to_the_ui(self):
++        with tempfile.TemporaryDirectory() as folder:
++            (Path(folder) / 'build-info.json').write_text(json.dumps({'commit': 'b' * 40, 'package_version': '1'}))
++            with patch.object(update.urllib.request, 'urlopen', side_effect=TimeoutError('offline')):
++                with self.assertRaises(TimeoutError):
++                    update.check(folder)
++
++    def test_installer_uses_an_existing_local_script_without_shell_interpolation(self):
++        with tempfile.TemporaryDirectory(prefix='installer space ') as folder:
++            with self.assertRaises(FileNotFoundError):
++                update.installer_command(folder)
++            (Path(folder) / 'install.sh').touch()
++            self.assertEqual(update.installer_command(folder),
++                             ['xdg-terminal-exec', '--', '/usr/bin/bash', str(Path(folder) / 'install.sh')])
+diff --git c/tests/test_settings.cpp i/tests/test_settings.cpp
+index d895560f41ed2c6a96bfe4d192cef588840c993e..8c948b51b2c405a7f89bdf871679ce6137bafc74 100644
+--- c/tests/test_settings.cpp
++++ i/tests/test_settings.cpp
+@@ -28,7 +28,8 @@ int main() {
+ 
+     BbSettings::Load();
+     auto& s = BbSettings::Get();
+-    assert(s.upscaler == BbSettings::UpscalerFsr3 && !s.show_fps && s.menu_x < 0.0f);
++    // CTR intentionally disables bbport's Bloodborne-specific upscaler on load.
++    assert(s.upscaler == BbSettings::UpscalerOff && !s.show_fps && s.menu_x < 0.0f);
+     s.show_fps = true;
+     s.upscaler = BbSettings::UpscalerFsr411;
+     s.menu_x = 0.625f;
+@@ -46,7 +47,22 @@ int main() {
+     s.menu_x = -1.0f;
+     s.menu_y = -1.0f;
+     BbSettings::Load();
+-    assert(s.menu_x == 0.625f && s.menu_y == 0.125f && s.upscaler == BbSettings::UpscalerFsr411);
++    assert(s.menu_x == 0.625f && s.menu_y == 0.125f && s.upscaler == BbSettings::UpscalerOff);
++    // An explicit windowed launch overrides persisted fullscreen; toggles persist both ways.
++    s.fullscreen = true;
++    BbSettings::Save();
++    setenv("BB_FULLSCREEN", "0", 1);
++    BbSettings::Load();
++    assert(!s.fullscreen);
++    setenv("BB_FULLSCREEN", "1", 1);
++    BbSettings::Load();
++    assert(s.fullscreen);
++    unsetenv("BB_FULLSCREEN");
++    s.fullscreen = false;
++    BbSettings::Save();
++    BbSettings::Load();
++    assert(!s.fullscreen);
++    assert(Read(path).find("fullscreen=0\n") != std::string::npos);
+     unlink(path);
+     std::puts("PASS: settings save keeps other keys, menu position");
+ }
+diff --git c/launcher/sacredfire_launcher.py i/launcher/sacredfire_launcher.py
 index d7b5166bb5f28952e8ecd460317ff08e7f2f44ce..f7839126a991ddc38dafbaecedbdd17faeae6a9f 100644
---- a/launcher/sacredfire_launcher.py
-+++ b/launcher/sacredfire_launcher.py
+--- c/launcher/sacredfire_launcher.py
++++ i/launcher/sacredfire_launcher.py
 @@ -18,6 +18,7 @@ import signal
  import subprocess
  import sys
@@ -1626,10 +2574,10 @@ index d7b5166bb5f28952e8ecd460317ff08e7f2f44ce..f7839126a991ddc38dafbaecedbdd17f
      os.chdir(PORT_DIR)
      os.execvpe("bash", ["bash", str(PORT_DIR / "run.sh")], game_environment(settings))
  
-diff --git a/launcher/steam_shortcuts.py b/launcher/steam_shortcuts.py
+diff --git c/launcher/steam_shortcuts.py i/launcher/steam_shortcuts.py
 index fc8c23b1121b5a1e3a61cad42506c35ba284f1ff..e3887f9c5287d119ffba6cd037258520b60ceb4c 100644
---- a/launcher/steam_shortcuts.py
-+++ b/launcher/steam_shortcuts.py
+--- c/launcher/steam_shortcuts.py
++++ i/launcher/steam_shortcuts.py
 @@ -158,6 +158,9 @@ def add_shortcut(path, entry):
  def launcher_command():
      """What Steam should start: the AppImage when running from one, else launcher/bb-launcher.sh;
@@ -1640,520 +2588,11 @@ index fc8c23b1121b5a1e3a61cad42506c35ba284f1ff..e3887f9c5287d119ffba6cd037258520
      appimage = os.environ.get("APPIMAGE")
      if appimage and Path(appimage).is_file():
          exe = str(Path(appimage).resolve())
-diff --git a/patches/CrashTeamRacing.xml b/patches/CrashTeamRacing.xml
-index a9bde14796bb93f338cb2d32e3a6166ad20d9cd4..2bcd4f66bb3eab3be5dcf21acac259ffdd022cdc 100644
---- a/patches/CrashTeamRacing.xml
-+++ b/patches/CrashTeamRacing.xml
-@@ -1,5 +1,5 @@
- <?xml version="1.0" encoding="utf-8"?>
--<!-- Crash Team Racing Nitro-Fueled (CUSA13795) 1.21 patches, from
-+<!-- Crash Team Racing Nitro-Fueled (CUSA13795 / CUSA14876) 1.21 patches, from
-      https://github.com/illusionyy/PS-Game-Patch (patches/xml/CrashTeamRacingUS-Orbis.xml),
-      authors illusion and TroyWarez. Selected in the in-game menu (bbport.ini patch_* keys),
-      compiled by scripts/patches.py into out/patches.bin at start.
-@@ -13,6 +13,7 @@
- <Patch>
-     <TitleID>
-         <ID>CUSA13795</ID>
-+        <ID>CUSA14876</ID>
-     </TitleID>
-     <Metadata Title="Crash Team Racing Nitro-Fueled"
-               Name="60 FPS Unlock"
-diff --git a/run.py b/run.py
-index 3ffd1ec61ec640e8541ec13b276d79c1cbeb22a3..8d154cd33054d8e1ca4d30c057c3f20a4c857acf 100644
---- a/run.py
-+++ b/run.py
-@@ -11,6 +11,7 @@ previous process to end first.
- Works from the MSYS2 CLANG64 Python or a python.org Python.
- """
- import ctypes
-+import json
- import os
- from pathlib import Path
- import shutil
-@@ -176,12 +177,14 @@ def main():
-             fail(f'{game} has the PS4 PKG Tool layout (Image0 and Sc0): prepare it in the launcher first.')
-         fail(f'No eboot.bin in {game} (set BB_GAME_DIR to your {TITLE_ID} folder).')
-     # The game check compares the executable image with the supported one (CTR NF 1.21).
--    check = subprocess.run([sys.executable, '-X', 'utf8', str(PORT / 'scripts' / 'game_check.py'), str(game)],
-+    check = subprocess.run([sys.executable, '-X', 'utf8', str(PORT / 'scripts' / 'game_check.py'), str(game), '--json'],
-                            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            text=True, encoding='utf-8', errors='replace', creationflags=no_console())
-     if check.returncode:
-         fail(check.stdout.strip() or 'Game check failed.', 2)
--    env['BB_GAME_PROFILE'] = check.stdout.strip() or 'ctr'
-+    profile = json.loads(check.stdout)
-+    title_id, app_version = profile['title'], profile['version']
-+    env['BB_GAME_PROFILE'] = profile['name']
-     say(f'Game profile: {env["BB_GAME_PROFILE"]}')
- 
-     original_game = game.resolve()
-@@ -205,7 +208,7 @@ def main():
-         say(f'PS4 Pro mode: {env["BB_NEO"]} (BB_NEO=1 turns it on)')
-         user_dir = Path(env.get('BB_USER_DIR', data / 'user')).resolve()
-         if env.get('BB_CLEAR_SHADER_CACHE', '0') == '1':
--            shutil.rmtree(user_dir / 'cache' / TITLE_ID, ignore_errors=True)
-+            shutil.rmtree(user_dir / 'cache' / title_id, ignore_errors=True)
-             say('Shader cache: cleared for this launch (BB_CLEAR_SHADER_CACHE=1)')
-         env.setdefault('BB_PREUPLOAD', '1')
-         # The PC memory model (dma-buf guest memory) is Linux only: the 0.3 model on Windows.
-@@ -241,7 +244,7 @@ def main():
-             first = False
-             run_python('scripts/patches.py', '--patches-dir', env.get('BB_PATCHES_DIR', 'patches'),
-                        '--patches-config', env.get('BB_PATCHES_CONFIG', data / 'patches.json'),
--                       '--app-version', APP_VERSION, '--title-id', TITLE_ID, '--out', out,
-+                       '--app-version', app_version, '--title-id', title_id, '--out', out,
-                        '--settings', config)
-             if user_vblank:
-                 env['BB_VBLANK_HZ'] = user_vblank
-diff --git a/run.sh b/run.sh
-index b9b8f85465e7e82b62b0560bab034f9eeb222dbc..75a25273c0dcfc61cc396be0052eaaa839f96a0a 100755
---- a/run.sh
-+++ b/run.sh
-@@ -50,9 +50,10 @@ if [[ -z ${PYTHON:-} ]]; then echo 'Install Python 3 or set PYTHON.' >&2; exit 1
- game=${BB_GAME_DIR:-orig/CUSA13795}
- if [[ ! -f $game/eboot.bin ]]; then echo "No eboot.bin in $game (set BB_GAME_DIR)." >&2; exit 1; fi
- # The game check (scripts/game_check.py) compares the executable image with the supported one
--# (Crash Team Racing Nitro-Fueled CUSA13795 1.21) and names the profile the runtime reads.
--profile=$("$PYTHON" scripts/game_check.py "$game") || { echo "$profile" >&2; exit 2; }
--export BB_GAME_PROFILE=${profile:-ctr}
-+# (registered CTR 1.21 editions) and names the profile the runtime reads.
-+profile_info=$("$PYTHON" scripts/game_check.py "$game" --json) || { echo "$profile_info" >&2; exit 2; }
-+read -r profile title_id app_version < <("$PYTHON" -c 'import json,sys; p=json.load(sys.stdin); print(p["name"],p["title"],p["version"])' <<< "$profile_info")
-+export BB_GAME_PROFILE=$profile
- echo "Game profile: $BB_GAME_PROFILE"
- original_game=$game
- game=$("$PYTHON" scripts/mods.py "$game" --out "$out" \
-@@ -68,18 +69,23 @@ fi
- "$PYTHON" scripts/link_modules.py "$game" --out "$out" --modules libc.prx libSceFios2.prx libSceNpToolkit2.prx
- # SacredFire: symbol names for this eboot's host-side imports (shadPS4's aerolib list, fetched once).
- "$PYTHON" tools/gen_import_names.py --out "$out"
--"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}"
-+"$PYTHON" scripts/content_profile.py "$game" --out "$out" --sku "${BB_CONTENT_SKU:-full}" --dlc-dir "${BB_DLC_DIR:-$data/dlc}"
- # The game runs at its own 30 FPS against a 60 Hz vblank unless the 60 FPS patch is on. Patches
- # come from patches/CrashTeamRacing.xml (community patches by illusion and TroyWarez, from
- # https://github.com/illusionyy/PS-Game-Patch), chosen in the in-game menu (bbport.ini patch_*
- # keys) or patches.json; BB_PATCHES_DIR adds a folder of further shadPS4-format XML files.
- fps=${BB_FPS:-30}
--"$PYTHON" scripts/patches.py --patches-dir "${BB_PATCHES_DIR:-patches}" --patches-config "${BB_PATCHES_CONFIG:-$data/patches.json}" \
--    --app-version 01.21 --title-id CUSA13795 --out "$out" --settings "$BB_CONFIG"
-+"$PYTHON" scripts/patches.py --patches-dir "${BB_PATCHES_DIR:-$data/patches}" --patches-config "${BB_PATCHES_CONFIG:-$data/patches.json}" \
-+    --app-version "$app_version" --title-id "$title_id" --out "$out" --settings "$BB_CONFIG"
- patch_args=(--patches "$out/patches.bin")
- # BB_NEO=1: PS4 Pro mode (sceKernelIsNeoMode, 7-CPU mode, 5568 MiB direct memory); the game then
- # picks its Pro rendering path. Off by default: the Steam Deck is closer to a base PS4.
- export BB_NEO=${BB_NEO:-0}
-+render_config=$("$PYTHON" scripts/render_config.py --settings "$BB_CONFIG" --neo "$BB_NEO" --memory "${BB_DMEM_MB:-0}")
-+IFS=$'\t' read -r BB_NEO render_memory render_label <<< "$render_config"
-+export BB_NEO
-+if (( render_memory > 0 )); then export BB_DMEM_MB=$render_memory; fi
-+echo "Internal resolution: $render_label"
- echo "PS4 Pro mode: ${BB_NEO} (BB_NEO=1 turns it on)"
- # The on-disk shader/pipeline cache (user/cache/CUSA13795) is kept across launches: the GPU
- # library preloads every pipeline from earlier sessions at start, so areas seen before no longer
-@@ -87,7 +93,7 @@ echo "PS4 Pro mode: ${BB_NEO} (BB_NEO=1 turns it on)"
- # deletes it first; the fur breakage that once forced a clear per launch is fixed
- # (docs/sacredfire/06-fur.md: geometry specialization and preload fetch shader).
- if [[ ${BB_CLEAR_SHADER_CACHE:-0} == 1 ]]; then
--    rm -rf "${BB_USER_DIR:-$data/user}/cache/CUSA13795"
-+    rm -rf "${BB_USER_DIR:-$data/user}/cache/$title_id"
-     echo "Shader cache: cleared for this launch (BB_CLEAR_SHADER_CACHE=1)"
- fi
- # With the 60 FPS patch the game's own limiter paces frames; a 60 Hz virtual vblank would
-@@ -192,14 +198,22 @@ echo "SacredFire ${version:-unknown version}"
- export BB_GPU_USER_DIR=${BB_USER_DIR:-$data/user}
- mkdir -p "$BB_GPU_USER_DIR"
- probe_args=("$out/boot-linked.bin" --import-names "$out/import_names.txt" --content-profile "$out/content.bin" "${patch_args[@]}" --app0 "$game" --user "${BB_USER_DIR:-$data/user}" --timeout "${BB_TIMEOUT:-0}" "$@")
--if [[ -n ${mod_game:-} ]]; then
--    "$probe" "${probe_args[@]}" &
--    mod_pid=$!
--    trap 'kill -TERM "$mod_pid" 2>/dev/null || true' TERM INT
--    mod_status=0
--    wait "$mod_pid" || mod_status=$?
--    # An interrupted wait must finish the child before removing its mounted view.
--    if kill -0 "$mod_pid" 2>/dev/null; then wait "$mod_pid" || mod_status=$?; fi
--    exit "$mod_status"
-+# Wait instead of exec so the in-game Apply and restart action works on Linux too.
-+"$probe" "${probe_args[@]}" &
-+game_pid=$!
-+trap 'kill -TERM "$game_pid" 2>/dev/null || true' TERM INT
-+game_status=0
-+wait "$game_pid" || game_status=$?
-+if kill -0 "$game_pid" 2>/dev/null; then wait "$game_pid" || game_status=$?; fi
-+if (( game_status == 75 )); then
-+    if [[ -n ${mod_game:-} ]]; then
-+        "$PYTHON" -c 'import shutil,sys; shutil.rmtree(sys.argv[1])' "$mod_game"
-+    fi
-+    trap - EXIT
-+    export BB_GAME_DIR=$original_game
-+    # Preserve the in-game display choice across a full process restart.
-+    saved_fullscreen=$("$PYTHON" -c 'import sys; sys.path.insert(0,"scripts"); from patches import read_settings; from pathlib import Path; print(read_settings(Path(sys.argv[1])).get("fullscreen",sys.argv[2]))' "$BB_CONFIG" "${BB_FULLSCREEN:-0}")
-+    export BB_FULLSCREEN=$saved_fullscreen
-+    exec bash "$0" "$@"
- fi
--exec "$probe" "${probe_args[@]}"
-+exit "$game_status"
-diff --git a/scripts/game_check.py b/scripts/game_check.py
-index 17e0bab7c0121f822a0ddfc70147f25bbd9fa999..ef954e8a0ae6ba0f7c6d6c4f87e57e5a0d006651 100644
---- a/scripts/game_check.py
-+++ b/scripts/game_check.py
-@@ -1,18 +1,20 @@
- #!/usr/bin/env python3
- """The game files this port runs, keyed on the executable's loaded image.
- 
--Profile: Crash Team Racing Nitro-Fueled CUSA13795 with the 1.21 update merged in. The check
-+Profiles: Crash Team Racing Nitro-Fueled CUSA13795 and the verified CUSA14876 1.21 build. The check
- compares the loaded executable image, whose hash is the same whatever tool dumped it (the SELF
- headers around it differ). BB_SKIP_GAME_CHECK=1 skips it. bbport's Bloodborne profile was removed
- on 2026-10-09.
- 
- Two builds of the 1.21 update exist: the one rebuilt for firmware 5.05 (sdk_ver=05050000 in
- param.sfo; the image in SUPPORTED, which the port was developed on) and the original one for
--firmware 6.72+. Same game, different executable. A 1.21 executable that is not a known old one is
-+firmware 6.72+. Same game, different executable. For CUSA13795 only, a 1.21 executable that is not a known old one is
- accepted as `variant='6.72+'`: patches.py finds its patch sites by signature instead of address,
- and the log says it is the less-tested build.
- """
- import hashlib
-+import argparse
-+import json
- import os
- import sys
- from pathlib import Path
-@@ -25,10 +27,19 @@ SUPPORTED = {
-         name='ctr', title='CUSA13795', version='01.21', game='Crash Team Racing Nitro-Fueled', update='CUSA13795-patch',
-         modules=('libc.prx', 'libSceFios2.prx', 'libSceNpToolkit2.prx'), patches=True),
- }
-+# Loaded-image hashes verified from the CUSA14876 base and 1.21 update.
-+# Do not accept an unknown regional executable just because its SFO claims version 1.21.
-+EU_IMAGE = '6b93d1f682fbfc5340dfd08360c8c0522a40f34585ec525c41537c40772bb39c'
-+EU_BASE_IMAGE = 'da391ad520838261ec4421636afd4bd1d178ee63623333b035e42fc219f1f855'
-+SUPPORTED[EU_IMAGE] = dict(
-+    name='ctr', title='CUSA14876', version='01.21', game='Crash Team Racing Nitro-Fueled',
-+    update='CUSA14876-patch', modules=('libc.prx', 'libSceFios2.prx', 'libSceNpToolkit2.prx'),
-+    patches=True, variant='validated-1.21')
- BY_TITLE = {p['title']: p for p in SUPPORTED.values()}
- # Images that are known NOT to be 1.21: the base game's executable (1.00). With a 1.21 param.sfo
- # these mean the update's eboot.bin was not copied in.
- OLD_IMAGES = {
-+    EU_BASE_IMAGE: '01.00',
-     'a9cdc80f2170624e08bdddab128fc9cdaf5c71aa90c00fc669d830e366ba6833': '01.00',
- }
- SUPPORTED_TITLE = 'CUSA13795'
-@@ -55,7 +66,10 @@ def profile(game, image_hash=None):
-     except (OSError, ValueError, IndexError, StopIteration, KeyError):
-         image_hash = None
-     if image_hash in SUPPORTED:
--        return dict(SUPPORTED[image_hash], variant='5.05')
-+        if problem(game, image_hash) is not None:
-+            return None
-+        found = SUPPORTED[image_hash]
-+        return dict(found, variant=found.get('variant', '5.05'))
-     if image_hash and problem(game, image_hash) is None and os.environ.get('BB_SKIP_GAME_CHECK') != '1':
-         info = sfo_info(game)
-         return dict(BY_TITLE[info['TITLE_ID']], variant='6.72+')
-@@ -103,6 +117,11 @@ def problem(game, image_hash=None):
-     except (OSError, ValueError, IndexError, StopIteration, KeyError):
-         return 'unreadable', title, version
-     if image_hash in SUPPORTED:
-+        expected = SUPPORTED[image_hash]
-+        if title != expected['title']:
-+            return 'identity_mismatch', title, version
-+        if version != expected['version']:
-+            return 'missing_update', title, version
-         return None
-     if title not in BY_TITLE:
-         return 'other_title', title, version
-@@ -110,6 +129,8 @@ def problem(game, image_hash=None):
-         return 'missing_update', title, version
-     if image_hash in OLD_IMAGES:
-         return 'wrong_eboot', title, version
-+    if title == 'CUSA14876':
-+        return 'unrecognized_build', title, version
-     return None  # another 1.21 build (6.72+): accepted, see the module docstring
- 
- 
-@@ -117,8 +138,10 @@ def explain(kind, title, version):
-     """What is wrong and what to do, for the log (English)."""
-     found = f'Found {title} version {version} (sce_sys/param.sfo).'
-     p = BY_TITLE.get(title, BY_TITLE[SUPPORTED_TITLE])
--    supported = ', '.join(f"{q['game']} {q['title']} {q['version']}" for q in SUPPORTED.values())
-+    supported = ', '.join(f"{q['game']} {q['title']} {q['version']}" for q in BY_TITLE.values())
-     return {
-+        'identity_mismatch': f'{found} The executable belongs to a different registered edition. Use matching base and update files.',
-+        'unrecognized_build': f'{found} This executable has not been validated for this edition. Use the supported decrypted 1.21 update; do not rename its metadata.',
-         'missing_update': f"{found} The port needs the {p['version']} update merged into the game folder: copy "
-                           f"everything from the dumped {p['version']} update (e.g. {p['update']}) into the "
-                           'game folder, replacing files (eboot.bin and sce_sys too).',
-@@ -135,10 +158,14 @@ def explain(kind, title, version):
- 
- if __name__ == '__main__':
-     # game_check.py GAME_DIR: prints the profile name (run.sh branches on it), or fails with the reason.
--    game = Path(sys.argv[1]) if len(sys.argv) > 1 else Path('.')
-+    parser = argparse.ArgumentParser(description='Validate a prepared game and report its runtime profile.')
-+    parser.add_argument('game', type=Path, nargs='?', default=Path('.'))
-+    parser.add_argument('--json', action='store_true', help='print validated profile metadata')
-+    args = parser.parse_args()
-+    game = args.game
-     found = problem(game)
-     if found:
-         sys.exit('Unsupported game files: ' + explain(*found))
-     p = profile(game)
--    print(p['name'] if p else 'unknown')
-+    print(json.dumps(p) if args.json else (p['name'] if p else 'unknown'))
- 
-diff --git a/scripts/patches.py b/scripts/patches.py
-index 3d258467b667a63c5bd154253f9fceaee2b0b713..71b7bad5b2ab5de5a6bfc3ab37504d323ad762c2 100644
---- a/scripts/patches.py
-+++ b/scripts/patches.py
-@@ -198,6 +198,15 @@ def external_patches(directory, app_version=APP_VERSION, title_id=TITLE_ID):
-     return found
- 
- 
-+def available_patches(directory, app_version=APP_VERSION, title_id=TITLE_ID):
-+    """Bundled patches plus user XML; a user entry with the same key overrides the bundle."""
-+    bundled = Path(__file__).resolve().parent.parent / 'patches'
-+    found = {key: (key, path, meta) for key, path, meta in external_patches(bundled, app_version, title_id)}
-+    if Path(directory).resolve() != bundled.resolve():
-+        found.update({key: (key, path, meta) for key, path, meta in external_patches(directory, app_version, title_id)})
-+    return list(found.values())
-+
-+
- def external_selection(found, config, ini=None):
-     """Selected patches: patches.json {"enabled": [...], "disabled": [...]} overrides each file's
-     isEnabled; bbport.ini patch_* keys (GAME_PATCH_KEYS, the in-game menu) add to it."""
-@@ -263,7 +272,7 @@ def main():
-     a=p.parse_args()
-     elf=(a.out/'eboot.elf').read_bytes()
-     segments=eboot_segments(elf)
--    found=external_patches(a.patches_dir,a.app_version,a.title_id)
-+    found=available_patches(a.patches_dir,a.app_version,a.title_id)
-     settings=read_settings(a.settings)
-     writes=compile_external(external_selection(found,a.patches_config,settings)+render_patches(settings),
-                             segments,elf)
-diff --git a/scripts/prepare.py b/scripts/prepare.py
-index a7ae9b93b40346cef722d569bae1008fdb561314..6e4316573dd981ef34a6ad7ac0136b8a68a5eba8 100644
---- a/scripts/prepare.py
-+++ b/scripts/prepare.py
-@@ -273,7 +273,7 @@ def prepare(game, out):
-     if game_profile and game_profile.get('variant'):
-         sdk = next((f.split('=', 1)[1] for f in str(report['sfo'].get('PUBTOOLINFO', '')).split(',')
-                     if f.startswith('sdk_ver=')), '?')
--        print(f"Update build: {game_profile['version']} for firmware {game_profile['variant']} (param.sfo sdk_ver={sdk})"
-+        print(f"Update build: {game_profile['title']} {game_profile['version']} ({game_profile['variant']}; sdk_ver={sdk})"
-               + ('' if game_profile['variant'] == '5.05' else '; patch sites are found by signature'))
-     print(f"{len(names)} imported symbols; {sum(counts.values()):,} relocations; {len(report['needed'])} required modules")
-     if missing:
-diff --git a/scripts/render_config.py b/scripts/render_config.py
-new file mode 100644
-index 0000000000000000000000000000000000000000..466930d08914927d244453686d192bfd89375855
---- /dev/null
-+++ b/scripts/render_config.py
-@@ -0,0 +1,24 @@
-+# SPDX-License-Identifier: GPL-2.0-or-later
-+"""Resolve the same render plan for the Linux launcher and restart path."""
-+import argparse
-+from pathlib import Path
-+from patches import read_settings, render_plan
-+
-+
-+def configuration(settings, neo='0', memory='0'):
-+    plan = render_plan(settings)
-+    if not plan:
-+        return str(neo), str(memory or '0'), 'Game default'
-+    memory = int(memory or '0')
-+    if plan['heap']:
-+        memory = max(memory, 7168)
-+    return ('1' if plan['pro'] else '0'), str(memory), plan['label']
-+
-+
-+if __name__ == '__main__':
-+    p = argparse.ArgumentParser(description=__doc__)
-+    p.add_argument('--settings', required=True, type=Path)
-+    p.add_argument('--neo', default='0')
-+    p.add_argument('--memory', default='0')
-+    a = p.parse_args()
-+    print('\t'.join(configuration(read_settings(a.settings), a.neo, a.memory)))
-diff --git a/src/probe.c b/src/probe.c
-index 4f89fb7e92cb365fc5994c059dbe8d00888f51b6..89a398995b59d02014c1d0ca2024c2337dad1df9 100644
---- a/src/probe.c
-+++ b/src/probe.c
-@@ -450,14 +450,12 @@ static void apply_patches(const char *path, Segment *segments, uint64_t ns, cons
-     fclose(f);
-     printf("Patches: %" PRIu64 " writes, %" PRIu64 " bytes applied, %" PRIu64 " pointers rebased\n",count,bytes,rebased);
- }
--/* Restarts the game through run.sh (the settings menu: a new render resolution is a patch
-- * applied at start). Descriptors are closed first so the old GPU device and its memory are
-- * released before the new process opens its own. */
-+/* Restarts through the platform wrapper after releasing the old process and GPU resources.
-+ * New render-resolution patches and saved display settings are applied on the next launch. */
- volatile int runtime_restarting;
- void runtime_restart(void) {
-     fflush(NULL);
--    /* The GPU threads still run until exec: their Vulkan calls fail once the device fd is
--     * closed below, and an assertion there must not end the process (exit 23) before exec. */
-+    /* Keep exit-time GPU failures from overriding a requested restart. */
-     runtime_restarting = 1;
-     __sync_synchronize();
- #ifdef _WIN32
-@@ -487,11 +485,10 @@ void runtime_restart(void) {
-     /* The new launch waits for this process's GPU device to go away (run.py --after). */
-     TerminateProcess(GetCurrentProcess(),0);
- #else
-+    /* Let run.sh release this process's GPU resources and mod view before relaunching.
-+     * The wrapper reloads saved display/render settings instead of inheriting stale overrides. */
-     puts("Runtime: restarting through run.sh");
--    syscall(SYS_close_range, 3u, ~0u, 0u);
--    execlp("bash", "bash", "run.sh", (char *)NULL);
--    perror("runtime_restart: exec");
--    _exit(1);
-+    _exit(75);
- #endif
- }
- 
-diff --git a/tests/test_control_bindings.py b/tests/test_control_bindings.py
-new file mode 100644
-index 0000000000000000000000000000000000000000..bb38ef31cfcc0dafc9d8b44962e51ef42342bab8
---- /dev/null
-+++ b/tests/test_control_bindings.py
-@@ -0,0 +1,90 @@
-+"""Runtime-compatible keyboard/gamepad names, validation and scoped resets."""
-+from pathlib import Path
-+import re
-+import shutil
-+import subprocess
-+import tempfile
-+import sys
-+import unittest
-+
-+ROOT = Path(__file__).resolve().parent.parent
-+sys.path.insert(0, str(ROOT / 'launcher'))
-+import control_bindings as controls
-+
-+
-+class BindingTests(unittest.TestCase):
-+    def test_actions_match_the_runtime(self):
-+        source = (ROOT / 'src/runtime_pad.c').read_text()
-+        table = source.split('input_names[IN_COUNT]={', 1)[1].split('};', 1)[0]
-+        actions = re.findall(r'"([a-z0-9_]+)"', table)
-+        self.assertEqual(set(controls.KEY_DEFAULTS), set(actions))
-+        self.assertEqual(set(controls.PAD_DEFAULTS), set(actions[:actions.index('move_up')]))
-+
-+    def test_reset_keeps_other_controls_settings_and_comments(self):
-+        values = {'key.cross': 'F', 'pad.cross': 'x', 'show_fps': '1', 'custom.setting': 'yes'}
-+        lines = ['# key.cross=note', 'key.cross=F', 'pad.cross=x', 'show_fps=1', 'custom.setting=yes']
-+        reset, kept = controls.reset(values, lines, 'key')
-+        self.assertNotIn('key.cross', reset)
-+        self.assertEqual(reset['pad.cross'], 'x')
-+        self.assertEqual(reset['custom.setting'], 'yes')
-+        self.assertIn('# key.cross=note', kept)
-+        self.assertNotIn('key.cross=F', kept)
-+        self.assertEqual(controls.binding(reset, 'key', 'cross'), 'Space')
-+
-+    def test_explicit_unbound_is_distinct_from_default(self):
-+        self.assertEqual(controls.binding({}, 'key', 'cross'), 'Space')
-+        self.assertEqual(controls.binding({'key.cross': ''}, 'key', 'cross'), '')
-+
-+    def test_defaults_and_custom_values_are_valid_sdl_names(self):
-+        try:
-+            controls.sdl()
-+        except OSError:
-+            self.skipTest('SDL3 is required')
-+        for prefix in ('key', 'pad'):
-+            for action, value in controls.defaults(prefix).items():
-+                with self.subTest(prefix=prefix, action=action):
-+                    self.assertEqual(controls.normalized(prefix, value.split(',')), value)
-+        self.assertEqual(controls.normalized('key', ['Space', 'F', 'Space', '']), 'Space,F')
-+        self.assertEqual(controls.normalized('key', ['', '', '', '']), '')
-+        for values in (['not-a-key'], ['A', 'B', 'C', 'D', 'E']):
-+            with self.assertRaises(ValueError):
-+                controls.normalized('key', values)
-+
-+
-+    def test_displayed_defaults_match_compiled_runtime_constants(self):
-+        compiler = shutil.which('cc')
-+        if not compiler or not Path('/usr/include/SDL3/SDL_scancode.h').is_file():
-+            self.skipTest('C compiler and SDL3 headers are required')
-+        source = (ROOT / 'src/runtime_pad.c').read_text().split('static void bind_defaults(void)', 1)[1].split('    memset(bindings', 1)[0]
-+        keyboard, pads = source.split('} pads[]={', 1)
-+        rows = []
-+        for prefix, text in (('key', keyboard), ('pad', pads)):
-+            for action, constant in re.findall(r'\{IN_([A-Z0-9_]+),\s*(SDL_[A-Z0-9_]+|PAD_[A-Z0-9_]+)\}', text):
-+                rows.append((prefix, action.lower(), constant))
-+        lines = ['#include <stdio.h>', '#include <SDL3/SDL_scancode.h>', '#include <SDL3/SDL_gamepad.h>', 'int main(void) {']
-+        for prefix, action, constant in rows:
-+            if constant.startswith('SDL_'):
-+                lines.append(f'printf("{prefix} {action} {constant} %d\\n", (int){constant});')
-+        lines += ['return 0;', '}']
-+        with tempfile.TemporaryDirectory() as folder:
-+            executable = str(Path(folder) / 'constants')
-+            subprocess.run([compiler, '-x', 'c', '-', '-o', executable], input='\n'.join(lines),
-+                           text=True, check=True, capture_output=True, timeout=15)
-+            output = subprocess.check_output([executable], text=True, timeout=3)
-+        resolved = {}
-+        for line in output.splitlines():
-+            prefix, action, constant, number = line.split()
-+            fn = controls.sdl().SDL_GetScancodeName if prefix == 'key' else controls.sdl().SDL_GetGamepadStringForButton
-+            resolved[prefix, action, constant] = fn(int(number)).decode()
-+        actual = {'key': {key: [] for key in controls.KEY_DEFAULTS},
-+                  'pad': {key: [] for key in controls.PAD_DEFAULTS}}
-+        for prefix, action, constant in rows:
-+            if constant == 'PAD_LEFT_TRIGGER':
-+                value = 'lefttrigger'
-+            elif constant == 'PAD_RIGHT_TRIGGER':
-+                value = 'righttrigger'
-+            else:
-+                value = resolved[prefix, action, constant]
-+            actual[prefix][action].append(value)
-+        for prefix in ('key', 'pad'):
-+            self.assertEqual({k: ','.join(v) for k, v in actual[prefix].items()}, controls.defaults(prefix))
-diff --git a/tests/test_game_check.py b/tests/test_game_check.py
-index 45f9f0b7ba732ff8ace3abcf657428127584c0b3..4e21857ca21c268c4d2907799d32dd578eb50b3c 100644
---- a/tests/test_game_check.py
-+++ b/tests/test_game_check.py
-@@ -104,5 +104,37 @@ class GameCheckTests(unittest.TestCase):
-             self.assertIn('CUSA', game_check.explain(kind, 'CUSA00000', '01.00'))
- 
- 
-+
-+    def test_verified_cusa14876_update_is_recognized(self):
-+        game = self.game('CUSA14876', '01.21')
-+        with mock.patch.object(game_check, 'image_sha256', return_value=game_check.EU_IMAGE):
-+            self.assertIsNone(game_check.problem(game))
-+            profile = game_check.profile(game)
-+            self.assertEqual(profile['title'], 'CUSA14876')
-+            self.assertEqual(profile['name'], 'ctr')
-+            self.assertEqual(profile['variant'], 'validated-1.21')
-+
-+    def test_unknown_cusa14876_executable_does_not_pass_by_metadata_alone(self):
-+        game = self.game('CUSA14876', '01.21')
-+        self.assertEqual(game_check.problem(game)[0], 'unrecognized_build')
-+        self.assertIsNone(game_check.profile(game))
-+
-+    def test_cusa14876_base_requires_the_update(self):
-+        game = self.game('CUSA14876', '01.00')
-+        with mock.patch.object(game_check, 'image_sha256', return_value=game_check.EU_BASE_IMAGE):
-+            self.assertEqual(game_check.problem(game)[0], 'missing_update')
-+        game = self.game('CUSA14876', '01.21')
-+        with mock.patch.object(game_check, 'image_sha256', return_value=game_check.EU_BASE_IMAGE):
-+            self.assertEqual(game_check.problem(game)[0], 'wrong_eboot')
-+
-+    def test_known_executable_must_match_the_edition_metadata(self):
-+        for title, image in (('CUSA13795', game_check.EU_IMAGE), ('CUSA14876', game_check.SUPPORTED_IMAGE)):
-+            with self.subTest(title=title):
-+                game = self.game(title, '01.21')
-+                with mock.patch.object(game_check, 'image_sha256', return_value=image):
-+                    self.assertEqual(game_check.problem(game)[0], 'identity_mismatch')
-+                    self.assertIsNone(game_check.profile(game))
-+
-+
- if __name__ == '__main__':
-     unittest.main()
-diff --git a/tests/test_launcher_features.py b/tests/test_launcher_features.py
+diff --git c/tests/test_launcher_features.py i/tests/test_launcher_features.py
 new file mode 100644
 index 0000000000000000000000000000000000000000..e843ff5ae0c92c2fb947085e1b5a7bbd26a9098a
 --- /dev/null
-+++ b/tests/test_launcher_features.py
++++ i/tests/test_launcher_features.py
 @@ -0,0 +1,221 @@
 +"""GTK integration for mapping persistence and update-check UI state."""
 +import json
@@ -2376,381 +2815,11 @@ index 0000000000000000000000000000000000000000..e843ff5ae0c92c2fb947085e1b5a7bbd
 +        self.assertFalse(self.window.install_update_button.get_visible())
 +        self.assertTrue(self.window.update_button.get_sensitive())
 +        self.assertIn('offline', self.window.update_row.get_subtitle())
-diff --git a/tests/test_launcher_startup.py b/tests/test_launcher_startup.py
-new file mode 100644
-index 0000000000000000000000000000000000000000..b629614b006d1839083c592d10f4d7db67e1fd34
---- /dev/null
-+++ b/tests/test_launcher_startup.py
-@@ -0,0 +1,54 @@
-+"""Direct-play startup behavior without spawning a game or a GTK window."""
-+from pathlib import Path
-+import sys
-+import tempfile
-+import unittest
-+from unittest.mock import patch
-+
-+ROOT = Path(__file__).resolve().parent.parent
-+sys.path.insert(0, str(ROOT / 'launcher'))
-+
-+try:
-+    import sacredfire_launcher as launcher
-+except (ImportError, ValueError):
-+    launcher = None
-+
-+
-+@unittest.skipIf(launcher is None, 'GTK4 and libadwaita are required')
-+class DirectPlayTests(unittest.TestCase):
-+    def test_unconfigured_shortcut_opens_setup_instead_of_exiting_silently(self):
-+        settings = {**launcher.DEFAULTS, 'game_dir': ''}
-+        with patch.object(launcher, 'load_settings', return_value=settings), \
-+             patch.object(launcher, 'LauncherApp') as app, \
-+             patch.object(launcher.os, 'execvpe') as execute:
-+            app.return_value.run.return_value = 0
-+            self.assertEqual(launcher.play(), 0)
-+            app.return_value.run.assert_called_once_with([])
-+            execute.assert_not_called()
-+
-+    def test_missing_game_directory_also_opens_setup(self):
-+        with tempfile.TemporaryDirectory() as folder:
-+            settings = {**launcher.DEFAULTS, 'game_dir': str(Path(folder) / 'missing')}
-+            with patch.object(launcher, 'load_settings', return_value=settings), \
-+                 patch.object(launcher, 'LauncherApp') as app, \
-+                 patch.object(launcher.os, 'execvpe') as execute:
-+                app.return_value.run.return_value = 0
-+                self.assertEqual(launcher.play(), 0)
-+                app.return_value.run.assert_called_once_with([])
-+                execute.assert_not_called()
-+
-+    def test_configured_shortcut_uses_saved_game_settings(self):
-+        with tempfile.TemporaryDirectory() as folder:
-+            (Path(folder) / 'eboot.bin').write_bytes(b'fixture')
-+            settings = {**launcher.DEFAULTS, 'game_dir': folder, 'fullscreen': True}
-+            with patch.object(launcher, 'load_settings', return_value=settings), \
-+                 patch.object(launcher, 'LauncherApp') as app, \
-+                 patch.object(launcher.os, 'chdir'), \
-+                 patch.object(launcher.os, 'execvpe') as execute:
-+                launcher.play()
-+                app.assert_not_called()
-+                executable, args, env = execute.call_args.args
-+                self.assertEqual(executable, 'bash')
-+                self.assertEqual(args, ['bash', str(launcher.PORT_DIR / 'run.sh')])
-+                self.assertEqual(env['BB_GAME_DIR'], folder)
-+                self.assertEqual(env['BB_FULLSCREEN'], '1')
-diff --git a/tests/test_library.py b/tests/test_library.py
-new file mode 100644
-index 0000000000000000000000000000000000000000..0ea1804e00bcb0e197527852cdcd2e01f49866a9
---- /dev/null
-+++ b/tests/test_library.py
-@@ -0,0 +1,179 @@
-+"""Library file operations: recovery, identity, validation and source preservation."""
-+import json
-+import os
-+from pathlib import Path
-+import struct
-+import sys
-+import tempfile
-+import unittest
-+from unittest.mock import patch
-+
-+ROOT = Path(__file__).resolve().parent.parent
-+sys.path.insert(0, str(ROOT / 'launcher'))
-+import library
-+sys.path.insert(0, str(ROOT / 'scripts'))
-+import render_config
-+
-+
-+def sfo_bytes(values):
-+    keys = data = b''
-+    entries = []
-+    for key, value in values.items():
-+        value = str(value).encode() + b'\0'
-+        entries.append((len(keys), 0x204, len(value), len(value), len(data)))
-+        keys += key.encode() + b'\0'
-+        data += value
-+    offset = 20 + 16 * len(entries)
-+    return struct.pack('<4sIIII', b'\0PSF', 0x101, offset, offset + len(keys), len(entries)) + b''.join(struct.pack('<HHIII', *e) for e in entries) + keys + data
-+
-+
-+class LibraryTests(unittest.TestCase):
-+    def setUp(self):
-+        self.temp = tempfile.TemporaryDirectory()
-+        self.addCleanup(self.temp.cleanup)
-+        self.root = Path(self.temp.name)
-+        self.active = self.root / 'user/savedata/1/CUSA14876'
-+        self.backups = self.root / 'backups'
-+
-+    def slot(self, root, value, name='slot'):
-+        (root / name).mkdir(parents=True)
-+        (root / name / 'data').write_text(value)
-+        meta = root / (name + '.sce_sys')
-+        meta.mkdir()
-+        (meta / 'param.bin').write_bytes(bytes(1328))
-+        return root
-+
-+    def test_import_backs_up_and_replaces_complete_slot_preserving_other_slots(self):
-+        self.slot(self.active, 'old')
-+        self.slot(self.active, 'keep', 'other')
-+        (self.active / 'slot/obsolete').write_text('stale')
-+        source = self.slot(self.root / 'import', 'new')
-+        library.import_saves(source, self.active, self.backups, 'CUSA14876')
-+        self.assertEqual((self.active / 'slot/data').read_text(), 'new')
-+        self.assertFalse((self.active / 'slot/obsolete').exists())
-+        self.assertEqual((self.active / 'other/data').read_text(), 'keep')
-+        backup = next(self.backups.iterdir())
-+        self.assertEqual((backup / 'slot/data').read_text(), 'old')
-+        self.assertEqual((source / 'slot/data').read_text(), 'new')
-+        self.assertEqual(json.loads((backup / '.ctr-save.json').read_text())['title'], 'CUSA14876')
-+
-+    def test_restore_replaces_all_slots_and_preserves_backup(self):
-+        self.slot(self.active, 'old')
-+        source = self.slot(self.root / 'restore', 'restored', 'restored')
-+        library.install_saves(source, self.active, self.backups, replace=True, title='CUSA14876')
-+        self.assertFalse((self.active / 'slot').exists())
-+        self.assertEqual((self.active / 'restored/data').read_text(), 'restored')
-+        self.assertTrue(any(self.backups.iterdir()))
-+
-+    def test_failed_backup_leaves_active_save_untouched(self):
-+        self.slot(self.active, 'old')
-+        source = self.slot(self.root / 'import', 'new')
-+        with patch.object(library, 'backup', side_effect=OSError('disk full')):
-+            with self.assertRaises(OSError): library.install_saves(source, self.active, self.backups)
-+        self.assertEqual((self.active / 'slot/data').read_text(), 'old')
-+
-+    def test_publish_failure_rolls_back(self):
-+        self.slot(self.active, 'old')
-+        source = self.slot(self.root / 'import', 'new')
-+        rename = Path.rename
-+        def fail_ready(path, target):
-+            if path.name == 'ready': raise OSError('publication failed')
-+            return rename(path, target)
-+        with patch.object(Path, 'rename', fail_ready):
-+            with self.assertRaises(OSError): library.install_saves(source, self.active, self.backups)
-+        self.assertEqual((self.active / 'slot/data').read_text(), 'old')
-+
-+    def test_unsafe_or_unrecognized_imports_cannot_overwrite_saves(self):
-+        self.slot(self.active, 'old')
-+        source = self.root / 'source'
-+        source.mkdir()
-+        for name in ('../escape', '.', '..', 'bad/name'):
-+            with self.assertRaises(ValueError): library.safe_name(name)
-+        (source / 'link').symlink_to(self.active, target_is_directory=True)
-+        with self.assertRaises(ValueError): library.import_saves(source, self.active, self.backups, 'CUSA14876')
-+        self.assertEqual((self.active / 'slot/data').read_text(), 'old')
-+        with self.assertRaises(ValueError): library.install_saves(self.active, self.active, self.backups)
-+
-+    def test_cross_region_manifest_is_rejected(self):
-+        source = self.slot(self.root / 'source', 'new')
-+        (source / '.ctr-save.json').write_text('{"title":"CUSA13795"}')
-+        with self.assertRaisesRegex(ValueError, 'another game edition'):
-+            library.import_saves(source, self.active, self.backups, 'CUSA14876')
-+        self.assertFalse(self.active.exists())
-+
-+    def test_decrypted_save_metadata_conversion_and_region_check(self):
-+        source = self.root / 'decrypted'
-+        (source / 'sce_sys').mkdir(parents=True)
-+        (source / 'save.dat').write_bytes(b'game save')
-+        values = {'TITLE_ID':'CUSA14876', 'SAVEDATA_DIRECTORY':'slot', 'MAINTITLE':'Title', 'SUBTITLE':'Checkpoint', 'DETAIL':'Details'}
-+        (source / 'sce_sys/param.sfo').write_bytes(sfo_bytes(values))
-+        with self.assertRaises(ValueError): library.import_saves(source, self.active, self.backups, 'CUSA13795')
-+        library.import_saves(source, self.active, self.backups, 'CUSA14876')
-+        blob = (self.active / 'slot.sce_sys/param.bin').read_bytes()
-+        self.assertEqual(len(blob),1328)
-+        self.assertEqual(blob[:128].rstrip(b'\0'),b'Title')
-+        self.assertEqual((self.active / 'slot/save.dat').read_bytes(), b'game save')
-+        self.assertFalse((self.active / 'slot/sce_sys').exists())
-+
-+    def test_export_is_new_and_rejects_recursive_target(self):
-+        self.slot(self.active, 'old')
-+        out = self.root / 'export'
-+        library.copy_new(self.active, out)
-+        with self.assertRaises(ValueError): library.copy_new(self.active, out)
-+        with self.assertRaises(ValueError): library.copy_new(self.active, self.active / 'recursive')
-+        self.assertEqual((out / 'slot/data').read_text(), 'old')
-+
-+    def test_dlc_validates_edition_and_preserves_original(self):
-+        source = self.root / 'own.pkg'
-+        source.write_bytes(b'fixture')
-+        info = {'CATEGORY':'ac','TITLE_ID':'CUSA14876','CONTENT_ID':'EP0002-CUSA14876_00-CTRDELUXEPACK001'}
-+        with patch.object(library.content_profile, 'pkg_param', return_value=info):
-+            target = library.add_dlc(source, self.root / 'dlc', 'CUSA14876')
-+            self.assertEqual(target.read_bytes(), b'fixture')
-+            with self.assertRaises(ValueError): library.add_dlc(source, self.root / 'dlc', 'CUSA14876')
-+            with self.assertRaises(ValueError): library.add_dlc(source, self.root / 'other', 'CUSA13795')
-+        self.assertTrue(source.exists())
-+
-+    def test_game_preparation_merges_into_new_folder_and_preserves_sources(self):
-+        base, update = self.root / 'base', self.root / 'update'
-+        for folder, category, version in ((base,'gd','01.00'),(update,'gp','01.21')):
-+            (folder / 'sce_sys').mkdir(parents=True)
-+            (folder / 'sce_sys/param.sfo').write_bytes(sfo_bytes({'TITLE_ID':'CUSA14876','CATEGORY':category,'APP_VER':version}))
-+            (folder / 'eboot.bin').write_bytes(version.encode())
-+        (base / 'sce_module').mkdir()
-+        for module in library.game_check.BY_TITLE['CUSA14876']['modules']:
-+            (base / 'sce_module' / module).write_bytes(b'fixture module')
-+        with patch.object(library.game_check, 'image_sha256', return_value=library.game_check.EU_IMAGE):
-+            target = library.prepare_game(base, update, self.root / 'data')
-+        self.assertEqual((target / 'eboot.bin').read_bytes(),b'01.21')
-+        self.assertEqual((base / 'eboot.bin').read_bytes(),b'01.00')
-+        self.assertEqual((update / 'eboot.bin').read_bytes(),b'01.21')
-+        with patch.object(library.game_check, 'image_sha256', return_value='unverified'):
-+            with self.assertRaises(ValueError): library.prepare_game(base, update, self.root / 'data')
-+        self.assertEqual(len(list((self.root / 'data/prepared').iterdir())),1)
-+
-+    def test_remove_dlc_cannot_remove_an_external_original(self):
-+        source = self.root / 'own.pkg'
-+        source.write_bytes(b'fixture')
-+        managed = self.root / 'dlc'
-+        managed.mkdir()
-+        with self.assertRaises(ValueError): library.remove_dlc(source, managed, 'CUSA14876')
-+        target = managed / 'copy.pkg'
-+        target.write_bytes(b'fixture')
-+        info = {'CATEGORY':'ac','TITLE_ID':'CUSA14876','CONTENT_ID':'EP0002-CUSA14876_00-CTRDELUXEPACK001'}
-+        with patch.object(library.content_profile,'pkg_param', return_value=info):
-+            library.remove_dlc(target, managed, 'CUSA14876')
-+        self.assertFalse(target.exists())
-+        self.assertTrue(source.exists())
-+
-+    def test_render_plan_matches_windows_resolution_and_memory(self):
-+        for value in ('480','720','1440','1620','2160'):
-+            neo, memory, label = render_config.configuration({'render_res':value})
-+            self.assertEqual(neo,'1')
-+            self.assertIn(value,label)
-+            self.assertEqual(memory, '7168' if value == '2160' else '0')
-+        self.assertEqual(render_config.configuration({'render_res':'1080'})[:2],('0','0'))
-+        self.assertEqual(render_config.configuration({'render_res':'2160'}, memory='8192')[1],'8192')
-+
-+
-+if __name__ == '__main__': unittest.main()
-diff --git a/tests/test_mods.py b/tests/test_mods.py
-index 795f2f70bbf8c1ffcdb317f07983d0f1aa39cd9c..c4312401434ead1575f061e9c0028fbac0ebbcf5 100644
---- a/tests/test_mods.py
-+++ b/tests/test_mods.py
-@@ -135,11 +135,21 @@ class ModTests(unittest.TestCase):
-         with self.assertRaises(ValueError):
-             mods.selected(self.moddir, config)
- 
-+    def test_restart_recreates_overlay_and_keeps_original_game_source(self):
-+        self.run_overlay(restart=True)
-+
-     def test_run_uses_overlay_propagates_exit_and_cleans_view(self):
-+        self.run_overlay(restart=False)
-+
-+    def run_overlay(self, restart):
-         self.mod('A')
-         python = self.root / 'python'
-         python.write_text(f'#!{sys.executable}\nimport subprocess,sys\n'
--            'if sys.argv[1] == "scripts/mods.py" or sys.argv[1] == "-c":\n'
-+            'if sys.argv[1] == "scripts/game_check.py":\n'
-+            "    print('{\"name\":\"ctr\",\"title\":\"CUSA13795\",\"version\":\"01.21\"}')\n"
-+            'elif sys.argv[1] == "scripts/render_config.py":\n'
-+            '    print("0\\t0\\tGame default")\n'
-+            'elif sys.argv[1] == "scripts/mods.py" or sys.argv[1] == "-c":\n'
-             '    sys.exit(subprocess.call([sys.executable,*sys.argv[1:]]))\n')
-         python.chmod(0o755)
-         probe = self.root / 'probe'
-@@ -147,13 +157,17 @@ class ModTests(unittest.TestCase):
-             'game=Path(sys.argv[sys.argv.index("--app0")+1])\n'
-             'Path(os.environ["BB_DATA_DIR"],"mounted.json").write_text(json.dumps({\n'
-             '"path":str(game),"content":(game/"dvdroot_ps4/chr/a.dcx").read_text()}))\n'
--            'sys.exit(7)\n')
-+            'record=Path(os.environ["BB_DATA_DIR"],"launches")\n'
-+            'n=int(record.read_text()) if record.exists() else 0\n'
-+            'record.write_text(str(n+1))\n'
-+            f'sys.exit(75 if {restart!r} and n == 0 else 7)\n')
-         probe.chmod(0o755)
-         env = dict(os.environ, BB_PREBUILT='1', BB_PROBE=str(probe), PYTHON=str(python),
-             BB_DATA_DIR=str(self.root), BB_GAME_DIR=str(self.game),
-             BB_MODS_DIR=str(self.moddir), BB_MODS_ENABLED='1', BB_MODS_CONFIG=str(self.root/'mods.json'))
-         result = subprocess.run(['bash', 'run.sh'], cwd=ROOT, env=env, capture_output=True, timeout=30)
-         self.assertEqual(result.returncode, 7, result.stderr)
-+        self.assertEqual((self.root / 'launches').read_text(), '2' if restart else '1')
-         mounted = json.loads((self.root / 'mounted.json').read_text())
-         self.assertEqual(mounted['content'], 'mod')
-         self.assertFalse(Path(mounted['path']).exists())
-diff --git a/tests/test_native_update.py b/tests/test_native_update.py
-new file mode 100644
-index 0000000000000000000000000000000000000000..861e55be051c23d6733f0162c1c41133844839ae
---- /dev/null
-+++ b/tests/test_native_update.py
-@@ -0,0 +1,73 @@
-+"""Native release validation and explicit update checks, using synthetic responses."""
-+import io
-+import json
-+from pathlib import Path
-+import subprocess
-+import sys
-+import tempfile
-+from types import SimpleNamespace
-+import unittest
-+from unittest.mock import patch
-+
-+ROOT = Path(__file__).resolve().parent.parent
-+sys.path.insert(0, str(ROOT / 'launcher'))
-+import native_update as update
-+
-+
-+def release():
-+    tag = 'arch-' + 'a' * 40
-+    names = ['ctr-nitrofueled-0.r300.gaaaaaaaaaaaa-1-x86_64.pkg.tar.zst', 'install.sh', 'SHA256SUMS']
-+    return {'tag_name': tag, 'draft': False, 'prerelease': False, 'assets': [
-+        {'name': n, 'browser_download_url': f'https://github.com/{update.REPOSITORY}/releases/download/{tag}/{n}'}
-+        for n in names]}
-+
-+
-+class UpdateTests(unittest.TestCase):
-+    def test_stable_release_has_verified_asset_locations(self):
-+        self.assertEqual(update.release_info(release())['version'], '0.r300.gaaaaaaaaaaaa-1')
-+
-+    def test_incomplete_or_untrusted_releases_are_rejected(self):
-+        for mutation in ('draft', 'prerelease', 'missing', 'foreign', 'duplicate', 'tag'):
-+            with self.subTest(mutation=mutation):
-+                data = release()
-+                if mutation in ('draft', 'prerelease'):
-+                    data[mutation] = True
-+                elif mutation == 'missing':
-+                    data['assets'].pop()
-+                elif mutation == 'foreign':
-+                    data['assets'][0]['browser_download_url'] = 'https://example.invalid/payload'
-+                elif mutation == 'duplicate':
-+                    data['assets'].append(data['assets'][0])
-+                else:
-+                    data['tag_name'] = 'unexpected'
-+                with self.assertRaises(ValueError):
-+                    update.release_info(data)
-+
-+    def test_check_compares_installed_version_and_does_not_send_local_metadata(self):
-+        with tempfile.TemporaryDirectory() as folder:
-+            (Path(folder) / 'build-info.json').write_text(json.dumps({'commit': 'b' * 40, 'package_version': '0.r263.gbbbbbbbbbbbb-1'}))
-+            for comparison, expected in (('-1', True), ('0', False), ('1', False)):
-+                with self.subTest(comparison=comparison), \
-+                     patch.object(update.urllib.request, 'urlopen', return_value=io.BytesIO(json.dumps(release()).encode())) as fetch, \
-+                     patch.object(update.subprocess, 'run', return_value=SimpleNamespace(stdout=comparison)) as run:
-+                    result = update.check(folder)
-+                    self.assertEqual(result['update_available'], expected)
-+                    request = fetch.call_args.args[0]
-+                    self.assertEqual(request.full_url, update.API)
-+                    self.assertIsNone(request.data)
-+                    self.assertEqual(run.call_args.args[0][0], 'vercmp')
-+
-+    def test_check_failure_is_returned_to_the_ui(self):
-+        with tempfile.TemporaryDirectory() as folder:
-+            (Path(folder) / 'build-info.json').write_text(json.dumps({'commit': 'b' * 40, 'package_version': '1'}))
-+            with patch.object(update.urllib.request, 'urlopen', side_effect=TimeoutError('offline')):
-+                with self.assertRaises(TimeoutError):
-+                    update.check(folder)
-+
-+    def test_installer_uses_an_existing_local_script_without_shell_interpolation(self):
-+        with tempfile.TemporaryDirectory(prefix='installer space ') as folder:
-+            with self.assertRaises(FileNotFoundError):
-+                update.installer_command(folder)
-+            (Path(folder) / 'install.sh').touch()
-+            self.assertEqual(update.installer_command(folder),
-+                             ['xdg-terminal-exec', '--', '/usr/bin/bash', str(Path(folder) / 'install.sh')])
-diff --git a/tests/test_patches.py b/tests/test_patches.py
-index f0a31fe583e404db10768c767d3f905dbc59cc49..26030f9171dd7ad7ce328575b67431dcf8517981 100644
---- a/tests/test_patches.py
-+++ b/tests/test_patches.py
-@@ -194,5 +194,26 @@ class GamePatchTests(unittest.TestCase):
+diff --git c/tests/test_patches.py i/tests/test_patches.py
+index f7f9e2df1b756669d6c9ddd1a7f36808ae681294..a15c2e5f1ee32cb7845686693add7a5f73a658ca 100644
+--- c/tests/test_patches.py
++++ i/tests/test_patches.py
+@@ -206,5 +206,28 @@ class GamePatchTests(unittest.TestCase):
              self.assertEqual(read_settings(Path(tmp) / 'missing.ini'), {})
  
  
@@ -2759,6 +2828,8 @@ index f0a31fe583e404db10768c767d3f905dbc59cc49..26030f9171dd7ad7ce328575b67431dc
 +    def test_bundled_signed_patches_are_selected_for_both_supported_editions(self):
 +        for title in ('CUSA13795', 'CUSA14876'):
 +            found = patches.external_patches(ROOT / 'patches', '01.21', title)
++            found = [(key, path, metadata) for key, path, metadata in found
++                     if patches.selection_key(key) in patches.GAME_PATCH_KEYS.values()]
 +            self.assertEqual(len(found), 3)
 +            for _key, _path, metadata in found:
 +                self.assertTrue(all(line.get('Signature') for line in metadata.iter('Line')))
@@ -2771,47 +2842,9 @@ index f0a31fe583e404db10768c767d3f905dbc59cc49..26030f9171dd7ad7ce328575b67431dc
 +    def test_user_directory_keeps_bundled_patches_and_filters_editions(self):
 +        with tempfile.TemporaryDirectory() as folder:
 +            found = patches.available_patches(Path(folder), '01.21', 'CUSA14876')
-+            self.assertEqual({key for key, _, _ in found}, set(patches.GAME_PATCH_KEYS.values()))
++            self.assertEqual({patches.selection_key(key) for key, _, _ in found}, set(patches.GAME_PATCH_KEYS.values()))
 +            self.assertEqual(patches.available_patches(Path(folder), '01.21', 'CUSA00000'), [])
 +
 +
  if __name__ == '__main__':
      unittest.main()
-diff --git a/tests/test_settings.cpp b/tests/test_settings.cpp
-index d895560f41ed2c6a96bfe4d192cef588840c993e..8c948b51b2c405a7f89bdf871679ce6137bafc74 100644
---- a/tests/test_settings.cpp
-+++ b/tests/test_settings.cpp
-@@ -28,7 +28,8 @@ int main() {
- 
-     BbSettings::Load();
-     auto& s = BbSettings::Get();
--    assert(s.upscaler == BbSettings::UpscalerFsr3 && !s.show_fps && s.menu_x < 0.0f);
-+    // CTR intentionally disables bbport's Bloodborne-specific upscaler on load.
-+    assert(s.upscaler == BbSettings::UpscalerOff && !s.show_fps && s.menu_x < 0.0f);
-     s.show_fps = true;
-     s.upscaler = BbSettings::UpscalerFsr411;
-     s.menu_x = 0.625f;
-@@ -46,7 +47,22 @@ int main() {
-     s.menu_x = -1.0f;
-     s.menu_y = -1.0f;
-     BbSettings::Load();
--    assert(s.menu_x == 0.625f && s.menu_y == 0.125f && s.upscaler == BbSettings::UpscalerFsr411);
-+    assert(s.menu_x == 0.625f && s.menu_y == 0.125f && s.upscaler == BbSettings::UpscalerOff);
-+    // An explicit windowed launch overrides persisted fullscreen; toggles persist both ways.
-+    s.fullscreen = true;
-+    BbSettings::Save();
-+    setenv("BB_FULLSCREEN", "0", 1);
-+    BbSettings::Load();
-+    assert(!s.fullscreen);
-+    setenv("BB_FULLSCREEN", "1", 1);
-+    BbSettings::Load();
-+    assert(s.fullscreen);
-+    unsetenv("BB_FULLSCREEN");
-+    s.fullscreen = false;
-+    BbSettings::Save();
-+    BbSettings::Load();
-+    assert(!s.fullscreen);
-+    assert(Read(path).find("fullscreen=0\n") != std::string::npos);
-     unlink(path);
-     std::puts("PASS: settings save keeps other keys, menu position");
- }
